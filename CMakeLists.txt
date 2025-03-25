@@ -20,6 +20,7 @@ add_subdirectory(
 add_executable(Eon
   source/Main.cpp
   source/Game.cpp
+  source/Entity.cpp
 )
 
 target_include_directories(Eon PRIVATE

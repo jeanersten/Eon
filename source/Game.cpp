@@ -42,6 +42,8 @@ void Game::handleEvent()
 void Game::handleRendering()
 {
   m_window.clear(sf::Color::White);
+  // NOTE: temporary
+  m_window.draw(player.visual);
   m_window.display();
 }
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Entity.h"
+
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 
@@ -13,6 +15,9 @@ private:
 
   bool running {};
   bool pausing {};
+
+  // NOTE: temporary
+  Entity player {};
 
   sf::RenderWindow m_window {};
 
