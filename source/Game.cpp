@@ -7,7 +7,6 @@
 
 Game::Game(const char* title, bool fullscreen)
   : m_title(title)
-  , m_full_screen(fullscreen)
   , running(true)
 {
   init();
@@ -15,7 +14,6 @@ Game::Game(const char* title, bool fullscreen)
 
 void Game::init()
 {
-  // TODO: Implement fullscreen window
   sf::VideoMode desktop_mode = sf::VideoMode::getDesktopMode();
   m_window.create(desktop_mode, m_title, sf::Style::Default, sf::State::Windowed);
   m_window.setPosition(sf::Vector2i{(int)desktop_mode.size.x / 2, (int)desktop_mode.size.y / 2});
@@ -42,8 +40,6 @@ void Game::handleEvent()
 void Game::handleRendering()
 {
   m_window.clear(sf::Color::White);
-  // NOTE: temporary
-  m_window.draw(player.visual);
   m_window.display();
 }
 
@@ -54,6 +50,5 @@ void Game::run()
     update();
   }
   
-  // INQY: is this even needed?
   m_window.close();
 }
