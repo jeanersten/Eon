@@ -7,7 +7,7 @@
 
 Game::Game(const char* title, bool fullscreen)
   : m_title(title)
-  , running(true)
+  , m_running(true)
 {
   init();
 }
@@ -32,7 +32,7 @@ void Game::handleEvent()
   {
     if (event->is<sf::Event::Closed>())
     {
-      running = false;
+      m_running = false;
     }
   }
 }
@@ -45,7 +45,7 @@ void Game::handleRendering()
 
 void Game::run()
 {
-  while (running)
+  while (m_running)
   {
     update();
   }

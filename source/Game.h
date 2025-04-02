@@ -8,8 +8,8 @@ class Game
 private:
   const char* m_title;
 
-  bool running;
-  bool pausing;
+  bool m_running;
+  bool m_pausing;
 
   sf::RenderWindow m_window;
 
