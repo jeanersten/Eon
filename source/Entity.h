@@ -3,9 +3,9 @@
 class Entity
 {
 private:
-  unsigned int m_id;
-
   bool m_active;
+
+  unsigned int m_id;
 
 public:
   Entity();
