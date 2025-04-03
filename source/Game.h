@@ -13,6 +13,8 @@ private:
 
   sf::RenderWindow m_window;
 
+  bool m_fullscreen;
+
   void init();
   void update();
 
