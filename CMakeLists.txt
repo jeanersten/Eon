@@ -18,12 +18,17 @@ add_subdirectory(
 )
 
 add_executable(Eon
+  source/Utils.cpp
   source/Main.cpp
   source/Game.cpp
   source/Entity.cpp
+  source/EntityManager.cpp
+  source/Debug.cpp
+  source/Components.cpp
 )
 
 target_include_directories(Eon PRIVATE
+  source/
   vendor/SFML/include
 )
 
