@@ -9,6 +9,13 @@ Entity::Entity(unsigned int id, const std::string& tag)
   : m_active(true)
   , m_id(id)
   , m_tag(tag)
+  , transform(nullptr)
+  , sprite(nullptr)
+  , rectangle_collider(nullptr)
+  , circle_collider(nullptr)
+  , score(nullptr)
+  , life_span(nullptr)
+  , input(nullptr)
 {}
 
 bool Entity::isActive()
