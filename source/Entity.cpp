@@ -3,7 +3,12 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 
-Entity::Entity()
+#include <string>
+
+Entity::Entity(unsigned int id, const std::string& tag)
+  : m_active(true)
+  , m_id(id)
+  , m_tag(tag)
 {}
 
 bool Entity::isActive()
@@ -14,6 +19,11 @@ bool Entity::isActive()
 unsigned int Entity::getID()
 {
   return m_id;
+}
+
+const std::string& Entity::getTag()
+{
+  return m_tag;
 }
 
 void Entity::destroy()
