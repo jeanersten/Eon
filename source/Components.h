@@ -9,7 +9,7 @@ struct CTransform
   sf::Angle rotation;
   sf::Vector2f direction;
   sf::Vector2f scale;
-  sf::Vector2f speed;
+  float speed;
 
   CTransform(sf::Vector2f position);
 };

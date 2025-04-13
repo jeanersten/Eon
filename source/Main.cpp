@@ -2,7 +2,7 @@
 
 int main()
 {
-  Game game {"Eon Engine!", true};
+  Game game {"Eon Engine!", false};
   game.run();
 
   return 0;

@@ -13,6 +13,12 @@ namespace utils
     bool checkCircleVsCircle(std::shared_ptr<Entity> first_entity, std::shared_ptr<Entity> second_entity);
   }
 
+  namespace calculator
+  {
+    sf::Angle angleBetween(sf::Vector2f from, sf::Vector2f to);
+    sf::Vector2f directionBetween(sf::Vector2f from, sf::Vector2f to);
+  }
+
   namespace generator
   {
     int generateRandomIndex(int min_range, int max_range);

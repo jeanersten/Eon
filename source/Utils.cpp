@@ -17,6 +17,16 @@ bool utils::collider::checkCircleVsCircle(std::shared_ptr<Entity> first_entity, 
   return squared_distance <= squared_radius;
 }
 
+sf::Angle utils::calculator::angleBetween(sf::Vector2f from, sf::Vector2f to)
+{
+  return (to - from).angle();
+}
+
+sf::Vector2f utils::calculator::directionBetween(sf::Vector2f from, sf::Vector2f to)
+{
+  return (to - from).normalized();
+}
+
 int utils::generator::generateRandomIndex(int min_range, int max_range)
 {
   if (min_range > max_range)

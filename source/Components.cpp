@@ -8,7 +8,7 @@ CTransform::CTransform(sf::Vector2f position)
   , rotation(sf::degrees(90.0f))
   , direction(sf::Vector2f{0.0f, 0.0f})
   , scale(sf::Vector2f{1.0f, 1.0f})
-  , speed(sf::Vector2f{0.0f, 0.0f})
+  , speed(0.0f)
 {}
 
 CSprite::CSprite(const sf::Texture& texture)
