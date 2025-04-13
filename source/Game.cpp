@@ -72,6 +72,9 @@ void Game::init()
 
 void Game::update()
 {
+  handleEvent();
+  handleRendering();
+
   if (m_window.hasFocus())
   {
     if (!m_pausing)
@@ -82,8 +85,6 @@ void Game::update()
       handleCollision();
       handleLIfeSpan();
     }
-    handleEvent();
-    handleRendering();
   }
 }
 
