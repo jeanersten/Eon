@@ -11,7 +11,11 @@ set(BUILD_SHARED_LIBS ON)
 
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<CONFIG>/bin)
+set(OUTPUT_DIR "${CMAKE_BINARY_DIR}/$<CONFIG>/bin")
+set(ASSETS_DIR "${CMAKE_SOURCE_DIR}/assets")
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR})
+
 
 add_subdirectory(
   vendor/SFML
@@ -43,3 +47,9 @@ foreach(SFML_LIB System Window Graphics)
     "$<TARGET_FILE_DIR:Eon>"
   )
 endforeach()
+
+add_custom_command(TARGET Eon POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+  "${ASSETS_DIR}"
+  "${OUTPUT_DIR}/assets"
+)
