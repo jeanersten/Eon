@@ -16,6 +16,13 @@
   #include <unistd.h>
 #endif
 
+#if defined (__APPLE__)
+  #include <cstdint>
+  #include <vector>
+
+  #include <mach-o/dyld.h>
+#endif
+
 bool utils::collider::checkCircleVsCircle(std::shared_ptr<Entity> first_entity, std::shared_ptr<Entity> second_entity)
 {
   const float x_distance {second_entity->transform->position.x - first_entity->transform->position.x};
@@ -41,14 +48,28 @@ sf::Vector2f utils::calculator::directionBetween(sf::Vector2f from, sf::Vector2f
 
 std::filesystem::path utils::locator::getAssetPath(const std::filesystem::path& file_path)
 {
-  #if defined (_WIN32)
-    wchar_t path[MAX_PATH] { 0 };
-    GetModuleFileNameW(NULL, path, MAX_PATH);
-    return std::filesystem::path(path).parent_path() / "assets" / file_path;
-  #elif defined (__linux__)
+  #if defined(_WIN32)
+  wchar_t path[MAX_PATH] {0};
+  DWORD len = GetModuleFileNameW(nullptr, path, MAX_PATH);
+  if (len == 0 || len == MAX_PATH) {
+    return {}; // Handle error
+  }
+  return std::filesystem::path(path).parent_path() / "assets" / file_path;
+  #elif defined(__linux__)
     char result[PATH_MAX];
     ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
-    return std::filesystem::path(std::string(result, (count > 0) ? count : 0)).parent_path() / "assets" / file_path;
+    if (count <= 0) {
+      return {}; // Handle error
+    }
+  return std::filesystem::path(std::string(result, count)).parent_path() / "assets" / file_path;
+  #elif defined(__APPLE__)
+    std::uint32_t size {0};
+    _NSGetExecutablePath(nullptr, &size); // get the required size
+    std::vector<char> buffer(size);
+    if (_NSGetExecutablePath(buffer.data(), &size) == 0) {
+      return std::filesystem::path(buffer.data()).parent_path() / "assets" / file_path;
+    }
+    return {}; // fallback: return empty path or handle error
   #endif
 }
 
