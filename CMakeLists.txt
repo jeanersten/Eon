@@ -16,7 +16,6 @@ set(ASSETS_DIR "${CMAKE_SOURCE_DIR}/assets")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR})
 
-
 add_subdirectory(
   vendor/SFML
 )
