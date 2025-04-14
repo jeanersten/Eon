@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(BUILD_SHARED_LIBS OFF)
+set(BUILD_SHARED_LIBS ON)
 
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 
@@ -31,7 +31,15 @@ target_include_directories(Eon PRIVATE
 )
 
 target_link_libraries(Eon PRIVATE
-  sfml-system
-  sfml-window
-  sfml-graphics
+  SFML::System
+  SFML::Window
+  SFML::Graphics
 )
+
+foreach(SFML_LIB System Window Graphics)
+  add_custom_command(TARGET Eon POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "$<TARGET_FILE:SFML::${SFML_LIB}>"
+    "$<TARGET_FILE_DIR:Eon>"
+  )
+endforeach()
