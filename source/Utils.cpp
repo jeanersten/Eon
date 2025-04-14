@@ -7,18 +7,14 @@
 
 #if defined (_WIN32)
   #include <Windows.h>
-#endif
-
-#if defined (__linux__)
+#elif defined (__linux__)
   #include <string>
 
   #include <limits.h>
   #include <unistd.h>
-#endif
-
-#if defined (__APPLE__)
+#elif defined (__APPLE__)
   #include <cstdint>
-  #include <vector>
+  #include <memory>
 
   #include <mach-o/dyld.h>
 #endif
@@ -49,27 +45,33 @@ sf::Vector2f utils::calculator::directionBetween(sf::Vector2f from, sf::Vector2f
 std::filesystem::path utils::locator::getAssetPath(const std::filesystem::path& file_path)
 {
   #if defined(_WIN32)
-  wchar_t path[MAX_PATH] {0};
-  DWORD len = GetModuleFileNameW(nullptr, path, MAX_PATH);
-  if (len == 0 || len == MAX_PATH) {
-    return {}; // Handle error
-  }
-  return std::filesystem::path(path).parent_path() / "assets" / file_path;
+    wchar_t path[MAX_PATH] {0};
+    DWORD len {GetModuleFileNameW(nullptr, path, MAX_PATH)};
+
+    if (len == 0 || len == MAX_PATH) {
+      return {};
+    }
+
+    return std::filesystem::path(path).parent_path() / "assets" / file_path;
   #elif defined(__linux__)
-    char result[PATH_MAX];
-    ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
+    char result[PATH_MAX] {0};
+    ssize_t count {readlink("/proc/self/exe", result, PATH_MAX)};
+
     if (count <= 0) {
-      return {}; // Handle error
+      return {};
     }
-  return std::filesystem::path(std::string(result, count)).parent_path() / "assets" / file_path;
+
+    return std::filesystem::path(std::string(result, count)).parent_path() / "assets" / file_path;
   #elif defined(__APPLE__)
-    std::uint32_t size {0};
-    _NSGetExecutablePath(nullptr, &size); // get the required size
-    std::vector<char> buffer(size);
-    if (_NSGetExecutablePath(buffer.data(), &size) == 0) {
-      return std::filesystem::path(buffer.data()).parent_path() / "assets" / file_path;
+    uint32_t size {0};
+    _NSGetExecutablePath(nullptr, &size);
+    std::unique_ptr<char[]> buffer {std::make_unique<char[]>(size)};
+
+    if (_NSGetExecutablePath(buffer.get(), &size) != 0) {
+        return {};
     }
-    return {}; // fallback: return empty path or handle error
+
+    return std::filesystem::path(buffer.get()).parent_path() / "assets" / file_path.relative_path();
   #endif
 }
 
