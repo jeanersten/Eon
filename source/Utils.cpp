@@ -1,8 +1,15 @@
 #include "Utils.h"
 
 #include <cmath>
+#include <filesystem>
 #include <random>
+#include <string>
 #include <utility>
+
+#if defined(__linux__)
+  #include <limits.h>
+  #include <unistd.h>
+#endif
 
 bool utils::collider::checkCircleVsCircle(std::shared_ptr<Entity> first_entity, std::shared_ptr<Entity> second_entity)
 {
@@ -25,6 +32,15 @@ sf::Angle utils::calculator::angleBetween(sf::Vector2f from, sf::Vector2f to)
 sf::Vector2f utils::calculator::directionBetween(sf::Vector2f from, sf::Vector2f to)
 {
   return (to - from).normalized();
+}
+
+std::filesystem::path utils::locator::getAssetPath(const std::filesystem::path& file_path)
+{
+  #if defined (__linux__)
+    char result[PATH_MAX];
+    ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
+    return std::filesystem::path(std::string(result, (count > 0) ? count : 0)).parent_path() / "assets" / file_path;
+  #endif
 }
 
 int utils::generator::generateRandomIndex(int min_range, int max_range)

@@ -43,23 +43,23 @@ void Game::init()
   }
   m_window.setFramerateLimit(60u);
 
-  if (!m_player_textures[0].loadFromFile("assets/textures/Player.png"))
+  if (!m_player_textures[0].loadFromFile(utils::locator::getAssetPath("textures/Player.png")))
   {
     std::cerr << "Failed to load Player.png\n";
   }
-  if (!m_bullet_textures[0].loadFromFile("assets/textures/Bullet.png"))
+  if (!m_bullet_textures[0].loadFromFile(utils::locator::getAssetPath("textures/Bullet.png")))
   {
     std::cerr << "Failed to load Bullet.png\n";
   }
-  if (! m_enemy_textures[0].loadFromFile("assets/textures/Enemy1.png"))
+  if (! m_enemy_textures[0].loadFromFile(utils::locator::getAssetPath("textures/Enemy1.png")))
   {
     std::cerr << "Failed to load Enemy1.png\n";
   }
-  if (! m_enemy_textures[1].loadFromFile("assets/textures/Enemy2.png"))
+  if (! m_enemy_textures[1].loadFromFile(utils::locator::getAssetPath("textures/Enemy2.png")))
   {
     std::cerr << "Failed to load Enemy2.png\n";
   }
-  if (! m_enemy_textures[2].loadFromFile("assets/textures/Enemy3.png"))
+  if (! m_enemy_textures[2].loadFromFile(utils::locator::getAssetPath("textures/Enemy3.png")))
   {
     std::cerr << "Failed to load Enemy3.png\n";
   }
@@ -593,6 +593,6 @@ void Game::run()
     update();
     m_entity_manager.update();
   }
-  
+
   m_window.close();
 }

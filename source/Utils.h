@@ -4,6 +4,7 @@
 
 #include <SFML/System.hpp>
 
+#include <filesystem>
 #include <memory>
 
 namespace utils
@@ -17,6 +18,11 @@ namespace utils
   {
     sf::Angle angleBetween(sf::Vector2f from, sf::Vector2f to);
     sf::Vector2f directionBetween(sf::Vector2f from, sf::Vector2f to);
+  }
+
+  namespace locator
+  {
+    std::filesystem::path getAssetPath(const std::filesystem::path& file_path);
   }
 
   namespace generator
