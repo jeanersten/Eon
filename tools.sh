@@ -22,7 +22,8 @@ DEBUG_PARAM="-deb"
 RELEASE_PARAM="-rel"
 
 print_usage() {
-  echo "\nUsage: $0 [ generate | build -(deb/rel) | run -(deb/rel) ]"
+  echo ""
+  echo "Usage: $0 [ generate | build -(deb/rel) | run -(deb/rel) ]"
   echo "---------------------------------------------------------------------------"
   echo "  generate  : Generate build files with CMake"
   echo "              (you may change generator in tools.sh)"
@@ -32,7 +33,8 @@ print_usage() {
   echo "  run       : Run executable binary for specified configuration"
   echo "              (defaults to debug if not specified)"
   echo "              (falls back if generator doesn't support multi-configuration)"
-  echo "---------------------------------------------------------------------------\n"
+  echo "---------------------------------------------------------------------------"
+  echo ""
   exit 1
 }
 
