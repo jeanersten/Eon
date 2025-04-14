@@ -31,6 +31,7 @@ add_executable(Eon
 )
 
 target_include_directories(Eon PRIVATE
+  source/
   vendor/SFML/include
 )
 
