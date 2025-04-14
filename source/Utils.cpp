@@ -3,10 +3,15 @@
 #include <cmath>
 #include <filesystem>
 #include <random>
-#include <string>
 #include <utility>
 
-#if defined(__linux__)
+#if defined (_WIN32)
+  #include <Windows.h>
+#endif
+
+#if defined (__linux__)
+  #include <string>
+
   #include <limits.h>
   #include <unistd.h>
 #endif
@@ -36,7 +41,11 @@ sf::Vector2f utils::calculator::directionBetween(sf::Vector2f from, sf::Vector2f
 
 std::filesystem::path utils::locator::getAssetPath(const std::filesystem::path& file_path)
 {
-  #if defined (__linux__)
+  #if defined (_WIN32)
+    wchar_t path[MAX_PATH] { 0 };
+    GetModuleFileNameW(NULL, path, MAX_PATH);
+    return std::filesystem::path(path).parent_path() / "assets" / file_path;
+  #elif defined (__linux__)
     char result[PATH_MAX];
     ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
     return std::filesystem::path(std::string(result, (count > 0) ? count : 0)).parent_path() / "assets" / file_path;
