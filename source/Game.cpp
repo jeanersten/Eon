@@ -31,12 +31,14 @@ void Game::init()
   if (m_fullscreen)
   {
     sf::Vector2u fullscreen_size {current_desktop_mode.size};
+
     m_render_window.create(sf::VideoMode{fullscreen_size}, m_title, sf::Style::None, sf::State::Fullscreen);
     m_render_window.setPosition(sf::Vector2i{0, 0});
   }
   else
   {
     sf::Vector2u windowed_size {sf::Vector2u{current_desktop_mode.size.x / 2, current_desktop_mode.size.y / 2}};
+
     m_render_window.create(sf::VideoMode{windowed_size}, m_title, sf::Style::Default, sf::State::Windowed);
     m_render_window.setPosition(sf::Vector2i{static_cast<int>((current_desktop_mode.size.x / 2) - (windowed_size.x / 2)),
                                              static_cast<int>((current_desktop_mode.size.y / 2) - (windowed_size.y / 2))});
@@ -346,6 +348,36 @@ void Game::handleEvent()
     {
       m_view = utils::renderer::getLetterboxView(resized->size, m_view);
     }
+    else if (const auto* mouse_moved = event->getIf<sf::Event::MouseMoved>())
+    {
+      m_mouse_position = m_render_window.mapPixelToCoords(sf::Mouse::getPosition(m_render_window), m_view);
+    }
+    else if (const auto* mouse_pressed = event->getIf<sf::Event::MouseButtonPressed>())
+    {
+      switch (mouse_pressed->button)
+      {
+        case sf::Mouse::Button::Left:
+          m_player->input->shoot = true;
+        break;
+
+        default:
+          ;
+        break;
+      }
+    }
+    else if (const auto* mouse_released = event->getIf<sf::Event::MouseButtonReleased>())
+    {
+      switch (mouse_released->button)
+      {
+        case sf::Mouse::Button::Left:
+          m_player->input->shoot = false;
+        break;
+
+        default:
+          ;
+        break;
+      }
+    }
     else if (const auto* key_pressed = event->getIf<sf::Event::KeyPressed>())
     {
       switch (key_pressed->scancode)
@@ -412,32 +444,6 @@ void Game::handleEvent()
         break;
       }
     }
-    else if (const auto* mouse_pressed = event->getIf<sf::Event::MouseButtonPressed>())
-    {
-      switch (mouse_pressed->button)
-      {
-        case sf::Mouse::Button::Left:
-          m_player->input->shoot = true;
-        break;
-
-        default:
-          ;
-        break;
-      }
-    }
-    else if (const auto* mouse_released = event->getIf<sf::Event::MouseButtonReleased>())
-    {
-      switch (mouse_released->button)
-      {
-        case sf::Mouse::Button::Left:
-          m_player->input->shoot = false;
-        break;
-
-        default:
-          ;
-        break;
-      }
-    }
   }
 }
 
@@ -475,11 +481,6 @@ void Game::handleRendering()
   m_render_texture.display();
 
   sf::Sprite render_sprite {m_render_texture.getTexture()};
-
-  sf::Vector2f window_mouse_position {sf::Vector2f(sf::Mouse::getPosition(m_render_window))};
-  m_mouse_position = window_mouse_position - static_cast<sf::Vector2f>(render_sprite.getPosition());
-  m_mouse_position.x /= render_sprite.getScale().x;
-  m_mouse_position.y /= render_sprite.getScale().y;
 
   m_render_window.clear(sf::Color::White);
   m_render_window.setView(m_view);
@@ -537,10 +538,10 @@ void Game::handleEnemySpawnTime(int max_enemies)
 
 void Game::handleCollision()
 {
-  float player_left = m_player->transform->position.x - m_player->circle_collider->bounds.getRadius();
-  float player_right = m_player->transform->position.x + m_player->circle_collider->bounds.getRadius();
-  float player_top = m_player->transform->position.y - m_player->circle_collider->bounds.getRadius();
-  float player_bottom = m_player->transform->position.y + m_player->circle_collider->bounds.getRadius();
+  float player_left {m_player->transform->position.x - m_player->circle_collider->bounds.getRadius()};
+  float player_right {m_player->transform->position.x + m_player->circle_collider->bounds.getRadius()};
+  float player_top {m_player->transform->position.y - m_player->circle_collider->bounds.getRadius()};
+  float player_bottom {m_player->transform->position.y + m_player->circle_collider->bounds.getRadius()};
 
   if (player_left <= 0.0f)
   {
@@ -561,10 +562,10 @@ void Game::handleCollision()
 
   for (auto enemy : m_entity_manager.getEntities("Enemy"))
   {
-    float enemy_left = enemy->transform->position.x - enemy->circle_collider->bounds.getRadius();
-    float enemy_right = enemy->transform->position.x + enemy->circle_collider->bounds.getRadius();
-    float enemy_top = enemy->transform->position.y - enemy->circle_collider->bounds.getRadius();
-    float enemy_bottom = enemy->transform->position.y + enemy->circle_collider->bounds.getRadius();
+    float enemy_left {enemy->transform->position.x - enemy->circle_collider->bounds.getRadius()};
+    float enemy_right {enemy->transform->position.x + enemy->circle_collider->bounds.getRadius()};
+    float enemy_top {enemy->transform->position.y - enemy->circle_collider->bounds.getRadius()};
+    float enemy_bottom {enemy->transform->position.y + enemy->circle_collider->bounds.getRadius()};
 
     if (enemy_left <= 0 || enemy_right >= m_render_texture.getSize().x)
     {
