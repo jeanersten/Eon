@@ -1,5 +1,8 @@
 #include "Utils.h"
 
+#include <SFML/Graphics.hpp>
+#include <SFML/System.hpp>
+
 #include <cmath>
 #include <filesystem>
 #include <random>
@@ -7,17 +10,47 @@
 
 #if defined (_WIN32)
   #include <Windows.h>
-#elif defined (__linux__)
+#endif
+
+#if defined (__linux__)
   #include <string>
 
   #include <limits.h>
   #include <unistd.h>
-#elif defined (__APPLE__)
+#endif
+
+#if defined (__APPLE__)
   #include <cstdint>
   #include <memory>
 
   #include <mach-o/dyld.h>
 #endif
+
+sf::View utils::renderer::getLetterboxView(sf::Vector2u size, sf::View view)
+{
+  float size_ratio {static_cast<float>(size.x) / static_cast<float>(size.y)};
+  float view_ratio {view.getSize().x / view.getSize().y};
+  float width_scale {1.0f};
+  float height_scale {1.0f};
+  float x_position_map {0.0f};
+  float y_position_map {0.0f};
+
+  if (size_ratio < view_ratio)
+  {
+    height_scale = size_ratio / view_ratio;
+    y_position_map = (1.0f - height_scale) / 2.0f;
+  }
+  else
+  {
+    width_scale = view_ratio / size_ratio;
+    x_position_map = (1.0f - width_scale) / 2.0f;
+  }
+
+  view.setViewport(sf::FloatRect{sf::Vector2f{x_position_map, y_position_map},
+                                 sf::Vector2f{width_scale, height_scale}});
+
+  return view;
+}
 
 bool utils::collider::checkCircleVsCircle(std::shared_ptr<Entity> first_entity, std::shared_ptr<Entity> second_entity)
 {
@@ -53,7 +86,9 @@ std::filesystem::path utils::locator::getAssetPath(const std::filesystem::path& 
     }
 
     return std::filesystem::path(path).parent_path() / "assets" / file_path;
-  #elif defined(__linux__)
+  #endif
+
+  #if defined(__linux__)
     char result[PATH_MAX] {0};
     ssize_t count {readlink("/proc/self/exe", result, PATH_MAX)};
 
@@ -62,7 +97,9 @@ std::filesystem::path utils::locator::getAssetPath(const std::filesystem::path& 
     }
 
     return std::filesystem::path(std::string(result, count)).parent_path() / "assets" / file_path;
-  #elif defined(__APPLE__)
+  #endif
+
+  #if defined(__APPLE__)
     uint32_t size {0};
     _NSGetExecutablePath(nullptr, &size);
     std::unique_ptr<char[]> buffer {std::make_unique<char[]>(size)};

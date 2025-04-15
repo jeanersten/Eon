@@ -2,6 +2,7 @@
 
 #include "Entity.h"
 
+#include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 
 #include <filesystem>
@@ -9,6 +10,11 @@
 
 namespace utils
 {
+  namespace renderer
+  {
+    sf::View getLetterboxView(sf::Vector2u size, sf::View view);
+  }
+
   namespace collider
   {
     bool checkCircleVsCircle(std::shared_ptr<Entity> first_entity, std::shared_ptr<Entity> second_entity);

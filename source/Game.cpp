@@ -43,10 +43,14 @@ void Game::init()
   }
   m_render_window.setFramerateLimit(60u);
 
-  if (m_render_texture.resize(sf::Vector2u(320, 240)))
+  if (!m_render_texture.resize(sf::Vector2u{640u, 480u}))
   {
     std::cerr << "Failed to resize render texture\n";
   }
+
+  m_view.setSize(static_cast<sf::Vector2f>(m_render_texture.getSize()));
+  m_view.setCenter(m_view.getSize() / 2.0f);
+  m_view = utils::renderer::getLetterboxView(m_render_window.getSize(), m_view);
   
   if (!m_player_textures[0].loadFromFile(utils::locator::getAssetPath("textures/Player.png")))
   {
@@ -338,6 +342,10 @@ void Game::handleEvent()
     {
       m_running = false;
     }
+    else if (const auto* resized = event->getIf<sf::Event::Resized>())
+    {
+      m_view = utils::renderer::getLetterboxView(resized->size, m_view);
+    }
     else if (const auto* key_pressed = event->getIf<sf::Event::KeyPressed>())
     {
       switch (key_pressed->scancode)
@@ -467,8 +475,6 @@ void Game::handleRendering()
   m_render_texture.display();
 
   sf::Sprite render_sprite {m_render_texture.getTexture()};
-  render_sprite.setPosition((static_cast<sf::Vector2f>(m_render_window.getSize()) / 2.0f) - 
-                            (static_cast<sf::Vector2f>(render_sprite.getTexture().getSize()) / 2.0f));
 
   sf::Vector2f window_mouse_position {sf::Vector2f(sf::Mouse::getPosition(m_render_window))};
   m_mouse_position = window_mouse_position - static_cast<sf::Vector2f>(render_sprite.getPosition());
@@ -476,6 +482,7 @@ void Game::handleRendering()
   m_mouse_position.y /= render_sprite.getScale().y;
 
   m_render_window.clear(sf::Color::White);
+  m_render_window.setView(m_view);
   m_render_window.draw(render_sprite);
   m_render_window.display();
 }

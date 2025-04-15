@@ -24,6 +24,7 @@ private:
 
   sf::RenderWindow m_render_window;
   sf::RenderTexture m_render_texture;
+  sf::View m_view;
 
   sf::Vector2f m_mouse_position;
 
