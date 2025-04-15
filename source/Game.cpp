@@ -31,18 +31,23 @@ void Game::init()
   if (m_fullscreen)
   {
     sf::Vector2u fullscreen_size {current_desktop_mode.size};
-    m_window.create(sf::VideoMode{fullscreen_size}, m_title, sf::Style::Default, sf::State::Fullscreen);
-    m_window.setPosition(sf::Vector2i{0, 0});
+    m_render_window.create(sf::VideoMode{fullscreen_size}, m_title, sf::Style::None, sf::State::Fullscreen);
+    m_render_window.setPosition(sf::Vector2i{0, 0});
   }
   else
   {
     sf::Vector2u windowed_size {sf::Vector2u{current_desktop_mode.size.x / 2, current_desktop_mode.size.y / 2}};
-    m_window.create(sf::VideoMode{windowed_size}, m_title, sf::Style::Close, sf::State::Windowed);
-    m_window.setPosition(sf::Vector2i{static_cast<int>((current_desktop_mode.size.x / 2) - (windowed_size.x / 2)),
-                                      static_cast<int>((current_desktop_mode.size.y / 2) - (windowed_size.y / 2))});
+    m_render_window.create(sf::VideoMode{windowed_size}, m_title, sf::Style::Default, sf::State::Windowed);
+    m_render_window.setPosition(sf::Vector2i{static_cast<int>((current_desktop_mode.size.x / 2) - (windowed_size.x / 2)),
+                                             static_cast<int>((current_desktop_mode.size.y / 2) - (windowed_size.y / 2))});
   }
-  m_window.setFramerateLimit(60u);
+  m_render_window.setFramerateLimit(60u);
 
+  if (m_render_texture.resize(sf::Vector2u(320, 240)))
+  {
+    std::cerr << "Failed to resize render texture\n";
+  }
+  
   if (!m_player_textures[0].loadFromFile(utils::locator::getAssetPath("textures/Player.png")))
   {
     std::cerr << "Failed to load Player.png\n";
@@ -64,8 +69,8 @@ void Game::init()
     std::cerr << "Failed to load Enemy3.png\n";
   }
 
-  m_default_player_position = sf::Vector2f{static_cast<float>(m_window.getSize().x) / 2.0f,
-                                           static_cast<float>(m_window.getSize().y) / 2.0f};
+  m_default_player_position = static_cast<sf::Vector2f>(m_render_texture.getSize()) / 2.0f;
+
   spawnPlayer();
   spawnEnemy();
 }
@@ -75,7 +80,7 @@ void Game::update()
   handleEvent();
   handleRendering();
 
-  if (m_window.hasFocus())
+  if (m_render_window.hasFocus())
   {
     if (!m_pausing)
     {
@@ -124,13 +129,11 @@ void Game::spawnPlayer()
 
 void Game::spawnBullet()
 {
-  sf::Vector2f mouse_position {static_cast<sf::Vector2f>(sf::Mouse::getPosition(m_window))};
-
   auto bullet {m_entity_manager.makeEntity("Bullet")};
 
   bullet->transform = std::make_shared<CTransform>(m_player->transform->position);
-  bullet->transform->rotation = utils::calculator::angleBetween(bullet->transform->position, mouse_position);
-  bullet->transform->direction = utils::calculator::directionBetween(bullet->transform->position, mouse_position);
+  bullet->transform->rotation = utils::calculator::angleBetween(bullet->transform->position, m_mouse_position);
+  bullet->transform->direction = utils::calculator::directionBetween(bullet->transform->position, m_mouse_position);
   bullet->transform->speed = 500.0f;
 
   bullet->sprite = std::make_shared<CSprite>(m_bullet_textures[0]);
@@ -148,8 +151,15 @@ void Game::spawnBullet()
 void Game::spawnEnemy()
 {
   int random_type {utils::generator::generateRandomIndex(1, 3)};
-  sf::Vector2f random_position {utils::generator::generateRandomPosition(64.0f, 576.0f, 64.0f, 416.0f,
-                                                                         m_player->transform->position, 128.0f)};
+  float x_min {96.0f};
+  float x_max {m_render_texture.getSize().x - 96.0f};
+  float y_min {96.0f};
+  float y_max {m_render_texture.getSize().y - 96.0f};
+  float player_range {128.0f};
+
+  sf::Vector2f random_position {utils::generator::generateRandomPosition(x_min, x_max, y_min, y_max,
+                                                                         m_player->transform->position,
+                                                                         player_range)};
   sf::Vector2f random_direction {utils::generator::generateRandomDirection()};
 
   auto enemy {m_entity_manager.makeEntity("Enemy")};
@@ -322,7 +332,7 @@ void Game::spawnSmallEnemies(std::shared_ptr<Entity> enemy)
 
 void Game::handleEvent()
 {
-  while(std::optional event = m_window.pollEvent())
+  while(std::optional event = m_render_window.pollEvent())
   {
     if (event->is<sf::Event::Closed>())
     {
@@ -425,8 +435,7 @@ void Game::handleEvent()
 
 void Game::handleRendering()
 {
-  m_window.clear(sf::Color::Black);
-
+  m_render_texture.clear(sf::Color::Black);
   for (auto entity : m_entity_manager.getEntities())
   {
     if (entity->transform && entity->sprite)
@@ -435,13 +444,13 @@ void Game::handleRendering()
       entity->sprite->visual.setRotation(entity->transform->rotation);
       entity->sprite->visual.setScale(entity->transform->scale);
 
-      m_window.draw(entity->sprite->visual);
+      m_render_texture.draw(entity->sprite->visual);
 
       if (entity->circle_collider)
       {
         entity->circle_collider->bounds.setPosition(entity->transform->position);
 
-        m_window.draw(entity->circle_collider->bounds);
+        m_render_texture.draw(entity->circle_collider->bounds);
       }
 
       if (entity->life_span)
@@ -455,17 +464,28 @@ void Game::handleRendering()
       }
     }
   }
+  m_render_texture.display();
 
-  m_window.display();
+  sf::Sprite render_sprite {m_render_texture.getTexture()};
+  render_sprite.setPosition((static_cast<sf::Vector2f>(m_render_window.getSize()) / 2.0f) - 
+                            (static_cast<sf::Vector2f>(render_sprite.getTexture().getSize()) / 2.0f));
+
+  sf::Vector2f window_mouse_position {sf::Vector2f(sf::Mouse::getPosition(m_render_window))};
+  m_mouse_position = window_mouse_position - static_cast<sf::Vector2f>(render_sprite.getPosition());
+  m_mouse_position.x /= render_sprite.getScale().x;
+  m_mouse_position.y /= render_sprite.getScale().y;
+
+  m_render_window.clear(sf::Color::White);
+  m_render_window.draw(render_sprite);
+  m_render_window.display();
 }
 
 void Game::handleMovement()
 {
-  sf::Vector2f mouse_position {static_cast<sf::Vector2f>(sf::Mouse::getPosition(m_window))};
   int player_move_x {static_cast<int>(m_player->input->right) - static_cast<int>(m_player->input->left)};
   int player_move_y {static_cast<int>(m_player->input->down) - static_cast<int>(m_player->input->up)};
 
-  m_player->transform->rotation = utils::calculator::angleBetween(m_player->transform->position, mouse_position);
+  m_player->transform->rotation = utils::calculator::angleBetween(m_player->transform->position, m_mouse_position);
   if (player_move_x || player_move_y)
   {
     m_player->transform->direction = sf::Vector2f{static_cast<float>(player_move_x), static_cast<float>(player_move_y)}.normalized();
@@ -519,17 +539,17 @@ void Game::handleCollision()
   {
     m_player->transform->position.x = 0.0f + m_player->circle_collider->bounds.getRadius();
   }
-  if (player_right >= m_window.getSize().x)
+  if (player_right >= m_render_texture.getSize().x)
   {
-    m_player->transform->position.x = m_window.getSize().x - m_player->circle_collider->bounds.getRadius();
+    m_player->transform->position.x = m_render_texture.getSize().x - m_player->circle_collider->bounds.getRadius();
   }
   if (player_top <= 0.0f)
   {
     m_player->transform->position.y = 0.0f + m_player->circle_collider->bounds.getRadius();
   }
-  if (player_bottom >= m_window.getSize().y)
+  if (player_bottom >= m_render_texture.getSize().y)
   {
-    m_player->transform->position.y = m_window.getSize().y - m_player->circle_collider->bounds.getRadius();
+    m_player->transform->position.y = m_render_texture.getSize().y - m_player->circle_collider->bounds.getRadius();
   }
 
   for (auto enemy : m_entity_manager.getEntities("Enemy"))
@@ -539,11 +559,11 @@ void Game::handleCollision()
     float enemy_top = enemy->transform->position.y - enemy->circle_collider->bounds.getRadius();
     float enemy_bottom = enemy->transform->position.y + enemy->circle_collider->bounds.getRadius();
 
-    if (enemy_left <= 0 || enemy_right >= m_window.getSize().x)
+    if (enemy_left <= 0 || enemy_right >= m_render_texture.getSize().x)
     {
       enemy->transform->direction.x = -enemy->transform->direction.x;
     }
-    if (enemy_top <= 0 || enemy_bottom >= m_window.getSize().y)
+    if (enemy_top <= 0 || enemy_bottom >= m_render_texture.getSize().y)
     {
       enemy->transform->direction.y = -enemy->transform->direction.y;
     }
@@ -594,5 +614,5 @@ void Game::run()
     m_entity_manager.update();
   }
 
-  m_window.close();
+  m_render_window.close();
 }

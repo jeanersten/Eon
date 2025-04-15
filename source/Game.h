@@ -22,7 +22,10 @@ private:
   bool m_running;
   bool m_pausing;
 
-  sf::RenderWindow m_window;
+  sf::RenderWindow m_render_window;
+  sf::RenderTexture m_render_texture;
+
+  sf::Vector2f m_mouse_position;
 
   bool m_fullscreen;
 
