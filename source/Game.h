@@ -22,6 +22,8 @@ private:
   bool m_running;
   bool m_pausing;
 
+  sf::Vector2u m_resolution;
+  sf::Vector2u m_min_resolution;
   sf::RenderWindow m_render_window;
   sf::RenderTexture m_render_texture;
   sf::View m_view;
@@ -51,13 +53,13 @@ private:
   void handleEvent();
   void handleRendering();
   void handleMovement();
-  void handlePlayerShooting();
-  void handleEnemySpawnTime(int max_enemies);
+  void handlePlayerShooting(float delay);
+  void handleEnemySpawnTime(float interval, int max_enemies);
   void handleCollision();
   void handleLIfeSpan();
 
 public:
-  Game(const std::string& title, bool full_screen);
+  Game(const std::string& title, sf::Vector2u resolution, bool full_screen);
 
   void run();
 };

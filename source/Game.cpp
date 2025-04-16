@@ -12,15 +12,19 @@
 #include <optional>
 #include <string>
 
-Game::Game(const std::string& title, bool fullscreen)
+Game::Game(const std::string& title, sf::Vector2u resolution, bool fullscreen)
   : m_title(title)
   , m_current_time(0.0f)
   , m_delta_time(0.0f)
   , m_running(true)
   , m_pausing(false)
+  , m_resolution(resolution)
+  , m_min_resolution(sf::Vector2u{640, 480})
   , m_fullscreen(fullscreen)
-  , m_enemy_textures()
 {
+  m_resolution.x < m_min_resolution.x ? m_resolution.x = m_min_resolution.x : m_resolution.x = resolution.x ;
+  m_resolution.y < m_min_resolution.y ? m_resolution.y = m_min_resolution.y : m_resolution.y = resolution.y ;
+
   init();
 }
 
@@ -45,7 +49,7 @@ void Game::init()
   }
   m_render_window.setFramerateLimit(60u);
 
-  if (!m_render_texture.resize(sf::Vector2u{640u, 480u}))
+  if (!m_render_texture.resize(m_resolution))
   {
     std::cerr << "Failed to resize render texture\n";
   }
@@ -91,8 +95,8 @@ void Game::update()
     if (!m_pausing)
     {
       handleMovement();
-      handlePlayerShooting();
-      handleEnemySpawnTime(5);
+      handlePlayerShooting(0.3f);
+      handleEnemySpawnTime(0.6f, 5);
       handleCollision();
       handleLIfeSpan();
     }
@@ -161,7 +165,7 @@ void Game::spawnEnemy()
   float x_max {m_render_texture.getSize().x - 96.0f};
   float y_min {96.0f};
   float y_max {m_render_texture.getSize().y - 96.0f};
-  float player_range {128.0f};
+  float player_range {80.0f};
 
   sf::Vector2f random_position {utils::generator::generateRandomPosition(x_min, x_max, y_min, y_max,
                                                                          m_player->transform->position,
@@ -509,24 +513,22 @@ void Game::handleMovement()
   }
 }
 
-void Game::handlePlayerShooting()
+void Game::handlePlayerShooting(float delay)
 {
   static float last_shot_time {m_current_time};
-  static float shoot_cooldown {0.5f};
 
-  if (m_player->input->shoot && ((m_current_time - last_shot_time) >= shoot_cooldown))
+  if (m_player->input->shoot && ((m_current_time - last_shot_time) >= delay))
   {
     spawnBullet();
     last_shot_time = m_current_time;
   }
 }
 
-void Game::handleEnemySpawnTime(int max_enemies)
+void Game::handleEnemySpawnTime(float interval, int max_enemies)
 {
   static float last_spawn_time {m_current_time};
-  static float spawn_cooldown {2.0f};
 
-  if ((m_current_time - last_spawn_time) >= spawn_cooldown)
+  if ((m_current_time - last_spawn_time) >= interval)
   {
     if (m_entity_manager.getEntities("Enemy").size() <= max_enemies)
     {
