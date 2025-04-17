@@ -108,7 +108,7 @@ std::filesystem::path utils::locator::getAssetPath(const std::filesystem::path& 
         return {};
     }
 
-    return std::filesystem::path(buffer.get()).parent_path() / "assets" / file_path.relative_path();
+    return std::filesystem::path(buffer.get()).parent_path() / "assets" / file_path;
   #endif
 }
 
