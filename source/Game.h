@@ -5,9 +5,17 @@
 
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
-#include <SFML/Window.hpp>
 
 #include <string>
+
+enum class GameState
+{
+  MAIN_MENU,
+  PAUSE_MENU,
+  PLAY,
+  WIN,
+  LOSE
+};
 
 class Game
 {
@@ -20,7 +28,8 @@ private:
   float m_current_time;
 
   bool m_running;
-  bool m_pausing;
+
+  GameState m_state;
 
   sf::Vector2u m_resolution;
   sf::Vector2u m_min_resolution;

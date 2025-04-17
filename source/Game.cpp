@@ -17,7 +17,6 @@ Game::Game(const std::string& title, sf::Vector2u resolution, bool fullscreen)
   , m_current_time(0.0f)
   , m_delta_time(0.0f)
   , m_running(true)
-  , m_pausing(false)
   , m_resolution(resolution)
   , m_min_resolution(sf::Vector2u{640, 480})
   , m_fullscreen(fullscreen)
@@ -30,6 +29,8 @@ Game::Game(const std::string& title, sf::Vector2u resolution, bool fullscreen)
 
 void Game::init()
 {
+  m_state = GameState::MAIN_MENU;
+
   sf::VideoMode current_desktop_mode {sf::VideoMode::getDesktopMode()};
 
   if (m_fullscreen)
@@ -92,14 +93,11 @@ void Game::update()
 
   if (m_render_window.hasFocus())
   {
-    if (!m_pausing)
-    {
-      handleMovement();
-      handlePlayerShooting(0.3f);
-      handleEnemySpawnTime(0.6f, 5);
-      handleCollision();
-      handleLIfeSpan();
-    }
+    handleMovement();
+    handlePlayerShooting(0.3f);
+    handleEnemySpawnTime(0.6f, 5);
+    handleCollision();
+    handleLIfeSpan();
   }
 }
 
@@ -257,6 +255,7 @@ void Game::spawnSmallEnemies(std::shared_ptr<Entity> enemy)
   switch (type)
   {
     case 1:
+    {
       for (int i = 0; i < object_division; i++)
       {
         sf::Angle circular_angle {(sf::degrees(360) / object_division) * i};
@@ -280,9 +279,11 @@ void Game::spawnSmallEnemies(std::shared_ptr<Entity> enemy)
 
         small_enemy->life_span = std::make_shared<CLifeSpan>(0.8f);
       }
+    }
     break;
 
     case 2:
+    {
       for (int i = 0; i < object_division; i++)
       {
         sf::Angle circular_angle {(sf::degrees(360) / object_division) * i};
@@ -306,9 +307,11 @@ void Game::spawnSmallEnemies(std::shared_ptr<Entity> enemy)
 
         small_enemy->life_span = std::make_shared<CLifeSpan>(0.8f);
       }
+    }
     break;
 
     case 3:
+    {
       for (int i = 0; i < object_division; i++)
       {
         sf::Angle circular_angle {(sf::degrees(360) / object_division) * i};
@@ -332,6 +335,7 @@ void Game::spawnSmallEnemies(std::shared_ptr<Entity> enemy)
 
         small_enemy->life_span = std::make_shared<CLifeSpan>(0.8f);
       }
+    }
     break;
 
     default:
@@ -356,240 +360,336 @@ void Game::handleEvent()
     {
       m_mouse_position = m_render_window.mapPixelToCoords(sf::Mouse::getPosition(m_render_window), m_view);
     }
-    else if (const auto* mouse_pressed = event->getIf<sf::Event::MouseButtonPressed>())
+
+    switch (m_state)
     {
-      switch (mouse_pressed->button)
+      case GameState::MAIN_MENU:
+        if (const auto* key_pressed = event->getIf<sf::Event::KeyPressed>())
+        {
+          switch (key_pressed->scancode)
+          {
+            case sf::Keyboard::Scancode::Enter:
+              m_state = GameState::PLAY;
+            break;
+
+            default:
+              ;
+            break;
+          }
+        }
+      break;
+
+      case GameState::PAUSE_MENU:
+        ;
+      break;
+
+      case GameState::PLAY:
       {
-        case sf::Mouse::Button::Left:
-          m_player->input->shoot = true;
-        break;
+        if (const auto* mouse_pressed = event->getIf<sf::Event::MouseButtonPressed>())
+        {
+          switch (mouse_pressed->button)
+          {
+            case sf::Mouse::Button::Left:
+              m_player->input->shoot = true;
+            break;
 
-        default:
-          ;
-        break;
+            default:
+              ;
+            break;
+          }
+        }
+        else if (const auto* mouse_released = event->getIf<sf::Event::MouseButtonReleased>())
+        {
+          switch (mouse_released->button)
+          {
+            case sf::Mouse::Button::Left:
+              m_player->input->shoot = false;
+            break;
+
+            default:
+              ;
+            break;
+          }
+        }
+        else if (const auto* key_pressed = event->getIf<sf::Event::KeyPressed>())
+        {
+          switch (key_pressed->scancode)
+          {
+            case sf::Keyboard::Scancode::Space:
+              m_state = GameState::PAUSE_MENU;
+            break;
+
+            case sf::Keyboard::Scancode::Left:
+            case sf::Keyboard::Scancode::A:
+              m_player->input->left = true;
+            break;
+
+            case sf::Keyboard::Scancode::Right:
+            case sf::Keyboard::Scancode::D:
+              m_player->input->right = true;
+            break;
+
+            case sf::Keyboard::Scancode::Up:
+            case sf::Keyboard::Scancode::W:
+              m_player->input->up = true;
+            break;
+
+            case sf::Keyboard::Scancode::Down:
+            case sf::Keyboard::Scancode::S:
+              m_player->input->down = true;
+            break;
+
+            default:
+              ;
+            break;
+          }
+        }
+        else if (const auto* key_released = event->getIf<sf::Event::KeyReleased>())
+        {
+          switch (key_released->scancode)
+          {
+            case sf::Keyboard::Scancode::Left:
+            case sf::Keyboard::Scancode::A:
+              m_player->input->left = false;
+            break;
+
+            case sf::Keyboard::Scancode::Right:
+            case sf::Keyboard::Scancode::D:
+              m_player->input->right = false;
+            break;
+
+            case sf::Keyboard::Scancode::Up:
+            case sf::Keyboard::Scancode::W:
+              m_player->input->up = false;
+            break;
+
+            case sf::Keyboard::Scancode::Down:
+            case sf::Keyboard::Scancode::S:
+              m_player->input->down = false;
+            break;
+
+            default:
+              ;
+            break;
+          }
+        }
+
       }
-    }
-    else if (const auto* mouse_released = event->getIf<sf::Event::MouseButtonReleased>())
-    {
-      switch (mouse_released->button)
-      {
-        case sf::Mouse::Button::Left:
-          m_player->input->shoot = false;
-        break;
+      break;
 
-        default:
-          ;
-        break;
-      }
-    }
-    else if (const auto* key_pressed = event->getIf<sf::Event::KeyPressed>())
-    {
-      switch (key_pressed->scancode)
-      {
-        case sf::Keyboard::Scancode::Space:
-          m_pausing = true;
-        break;
+      case GameState::WIN:
+        ;
+      break;
 
-        case sf::Keyboard::Scancode::Left:
-        case sf::Keyboard::Scancode::A:
-          m_player->input->left = true;
-        break;
+      case GameState::LOSE:
+        ;
+      break;
 
-        case sf::Keyboard::Scancode::Right:
-        case sf::Keyboard::Scancode::D:
-          m_player->input->right = true;
-        break;
-
-        case sf::Keyboard::Scancode::Up:
-        case sf::Keyboard::Scancode::W:
-          m_player->input->up = true;
-        break;
-
-        case sf::Keyboard::Scancode::Down:
-        case sf::Keyboard::Scancode::S:
-          m_player->input->down = true;
-        break;
-
-        default:
-          ;
-        break;
-      }
-    }
-    else if (const auto* key_released = event->getIf<sf::Event::KeyReleased>())
-    {
-      switch (key_released->scancode)
-      {
-        case sf::Keyboard::Scancode::Space:
-          m_pausing = false;
-        break;
-
-        case sf::Keyboard::Scancode::Left:
-        case sf::Keyboard::Scancode::A:
-          m_player->input->left = false;
-        break;
-
-        case sf::Keyboard::Scancode::Right:
-        case sf::Keyboard::Scancode::D:
-          m_player->input->right = false;
-        break;
-
-        case sf::Keyboard::Scancode::Up:
-        case sf::Keyboard::Scancode::W:
-          m_player->input->up = false;
-        break;
-
-        case sf::Keyboard::Scancode::Down:
-        case sf::Keyboard::Scancode::S:
-          m_player->input->down = false;
-        break;
-
-        default:
-          ;
-        break;
-      }
+      default:
+        ;
+      break;
     }
   }
 }
 
 void Game::handleRendering()
 {
-  m_render_texture.clear(sf::Color::Black);
-  for (auto entity : m_entity_manager.getEntities())
+  switch (m_state)
   {
-    if (entity->transform && entity->sprite)
+    case GameState::MAIN_MENU:
     {
-      entity->sprite->visual.setPosition(entity->transform->position);
-      entity->sprite->visual.setRotation(entity->transform->rotation);
-      entity->sprite->visual.setScale(entity->transform->scale);
-
-      m_render_texture.draw(entity->sprite->visual);
-
-      if (entity->circle_collider)
-      {
-        entity->circle_collider->bounds.setPosition(entity->transform->position);
-
-        m_render_texture.draw(entity->circle_collider->bounds);
-      }
-
-      if (entity->life_span)
-      {
-        float ratio {entity->life_span->remaining / entity->life_span->total};
-        sf::Color color_transparent_change {entity->sprite->visual.getColor()};
-
-        color_transparent_change.a = 255 * ratio;
-
-        entity->sprite->visual.setColor(color_transparent_change);
-      }
+      m_render_window.clear(sf::Color::Blue);
+      m_render_window.setView(m_view);
+      m_render_window.display();
     }
+    break;
+
+    case GameState::PAUSE_MENU:
+    {
+      m_render_window.clear(sf::Color::Yellow);
+      m_render_window.setView(m_view);
+      m_render_window.display();
+    }
+    break;
+
+    case GameState::PLAY:
+    {
+      m_render_texture.clear(sf::Color::Black);
+      for (auto entity : m_entity_manager.getEntities())
+      {
+        if (entity->transform && entity->sprite)
+        {
+          entity->sprite->visual.setPosition(entity->transform->position);
+          entity->sprite->visual.setRotation(entity->transform->rotation);
+          entity->sprite->visual.setScale(entity->transform->scale);
+
+          m_render_texture.draw(entity->sprite->visual);
+
+          if (entity->circle_collider)
+          {
+            entity->circle_collider->bounds.setPosition(entity->transform->position);
+
+            m_render_texture.draw(entity->circle_collider->bounds);
+          }
+
+          if (entity->life_span)
+          {
+            float ratio {entity->life_span->remaining / entity->life_span->total};
+            sf::Color color_transparent_change {entity->sprite->visual.getColor()};
+
+            color_transparent_change.a = 255 * ratio;
+
+            entity->sprite->visual.setColor(color_transparent_change);
+          }
+        }
+      }
+      m_render_texture.display();
+
+      sf::Sprite render_sprite {m_render_texture.getTexture()};
+
+      m_render_window.clear(sf::Color::White);
+      m_render_window.setView(m_view);
+      m_render_window.draw(render_sprite);
+      m_render_window.display();
+    }
+    break;
+
+    case GameState::WIN:
+    {
+      m_render_window.clear(sf::Color::Green);
+      m_render_window.setView(m_view);
+      m_render_window.display();
+    }
+    break;
+
+    case GameState::LOSE:
+    {
+      m_render_window.clear(sf::Color::Red);
+      m_render_window.setView(m_view);
+      m_render_window.display();
+    }
+    break;
+
+    default:
+    {
+      m_render_window.clear(sf::Color::Black);
+      m_render_window.setView(m_view);
+      m_render_window.display();
+    }
+    break;
   }
-  m_render_texture.display();
-
-  sf::Sprite render_sprite {m_render_texture.getTexture()};
-
-  m_render_window.clear(sf::Color::White);
-  m_render_window.setView(m_view);
-  m_render_window.draw(render_sprite);
-  m_render_window.display();
 }
 
 void Game::handleMovement()
 {
-  int player_move_x {static_cast<int>(m_player->input->right) - static_cast<int>(m_player->input->left)};
-  int player_move_y {static_cast<int>(m_player->input->down) - static_cast<int>(m_player->input->up)};
+  if (m_state == GameState::PLAY)
+  {
+    int player_move_x {static_cast<int>(m_player->input->right) - static_cast<int>(m_player->input->left)};
+    int player_move_y {static_cast<int>(m_player->input->down) - static_cast<int>(m_player->input->up)};
 
-  m_player->transform->rotation = utils::calculator::angleBetween(m_player->transform->position, m_mouse_position);
-  if (player_move_x || player_move_y)
-  {
-    m_player->transform->direction = sf::Vector2f{static_cast<float>(player_move_x), static_cast<float>(player_move_y)}.normalized();
-  }
-  else
-  {
-    m_player->transform->direction = sf::Vector2f{0.0f, 0.0f};
-  }
+    m_player->transform->rotation = utils::calculator::angleBetween(m_player->transform->position, m_mouse_position);
+    if (player_move_x || player_move_y)
+    {
+      m_player->transform->direction = sf::Vector2f{static_cast<float>(player_move_x), static_cast<float>(player_move_y)}.normalized();
+    }
+    else
+    {
+      m_player->transform->direction = sf::Vector2f{0.0f, 0.0f};
+    }
 
-  for (auto entity : m_entity_manager.getEntities())
-  {
-    entity->transform->position += entity->transform->direction * entity->transform->speed * m_delta_time;
+    for (auto entity : m_entity_manager.getEntities())
+    {
+      entity->transform->position += entity->transform->direction * entity->transform->speed * m_delta_time;
+    }
   }
 }
 
 void Game::handlePlayerShooting(float delay)
 {
-  static float last_shot_time {m_current_time};
-
-  if (m_player->input->shoot && ((m_current_time - last_shot_time) >= delay))
+  if (m_state == GameState::PLAY)
   {
-    spawnBullet();
-    last_shot_time = m_current_time;
+    static float last_shot_time {m_current_time};
+
+    if (m_player->input->shoot && ((m_current_time - last_shot_time) >= delay))
+    {
+      spawnBullet();
+      last_shot_time = m_current_time;
+    }
   }
 }
 
 void Game::handleEnemySpawnTime(float interval, int max_enemies)
 {
-  static float last_spawn_time {m_current_time};
-
-  if ((m_current_time - last_spawn_time) >= interval)
+  if (m_state == GameState::PLAY)
   {
-    if (m_entity_manager.getEntities("Enemy").size() <= max_enemies)
+    static float last_spawn_time {m_current_time};
+
+    if ((m_current_time - last_spawn_time) >= interval)
     {
-      spawnEnemy();
+      if (m_entity_manager.getEntities("Enemy").size() <= max_enemies)
+      {
+        spawnEnemy();
+      }
+      last_spawn_time = m_current_time;
     }
-    last_spawn_time = m_current_time;
   }
 }
 
 void Game::handleCollision()
 {
-  float player_left {m_player->transform->position.x - m_player->circle_collider->bounds.getRadius()};
-  float player_right {m_player->transform->position.x + m_player->circle_collider->bounds.getRadius()};
-  float player_top {m_player->transform->position.y - m_player->circle_collider->bounds.getRadius()};
-  float player_bottom {m_player->transform->position.y + m_player->circle_collider->bounds.getRadius()};
+  if (m_state == GameState::PLAY)
+  {
+    float player_left {m_player->transform->position.x - m_player->circle_collider->bounds.getRadius()};
+    float player_right {m_player->transform->position.x + m_player->circle_collider->bounds.getRadius()};
+    float player_top {m_player->transform->position.y - m_player->circle_collider->bounds.getRadius()};
+    float player_bottom {m_player->transform->position.y + m_player->circle_collider->bounds.getRadius()};
 
-  if (player_left <= 0.0f)
-  {
-    m_player->transform->position.x = 0.0f + m_player->circle_collider->bounds.getRadius();
-  }
-  if (player_right >= m_render_texture.getSize().x)
-  {
-    m_player->transform->position.x = m_render_texture.getSize().x - m_player->circle_collider->bounds.getRadius();
-  }
-  if (player_top <= 0.0f)
-  {
-    m_player->transform->position.y = 0.0f + m_player->circle_collider->bounds.getRadius();
-  }
-  if (player_bottom >= m_render_texture.getSize().y)
-  {
-    m_player->transform->position.y = m_render_texture.getSize().y - m_player->circle_collider->bounds.getRadius();
-  }
-
-  for (auto enemy : m_entity_manager.getEntities("Enemy"))
-  {
-    float enemy_left {enemy->transform->position.x - enemy->circle_collider->bounds.getRadius()};
-    float enemy_right {enemy->transform->position.x + enemy->circle_collider->bounds.getRadius()};
-    float enemy_top {enemy->transform->position.y - enemy->circle_collider->bounds.getRadius()};
-    float enemy_bottom {enemy->transform->position.y + enemy->circle_collider->bounds.getRadius()};
-
-    if (enemy_left <= 0 || enemy_right >= m_render_texture.getSize().x)
+    if (player_left <= 0.0f)
     {
-      enemy->transform->direction.x = -enemy->transform->direction.x;
+      m_player->transform->position.x = 0.0f + m_player->circle_collider->bounds.getRadius();
     }
-    if (enemy_top <= 0 || enemy_bottom >= m_render_texture.getSize().y)
+    if (player_right >= m_render_texture.getSize().x)
     {
-      enemy->transform->direction.y = -enemy->transform->direction.y;
+      m_player->transform->position.x = m_render_texture.getSize().x - m_player->circle_collider->bounds.getRadius();
+    }
+    if (player_top <= 0.0f)
+    {
+      m_player->transform->position.y = 0.0f + m_player->circle_collider->bounds.getRadius();
+    }
+    if (player_bottom >= m_render_texture.getSize().y)
+    {
+      m_player->transform->position.y = m_render_texture.getSize().y - m_player->circle_collider->bounds.getRadius();
     }
 
-    if (utils::collider::checkCircleVsCircle(m_player, enemy))
+    for (auto enemy : m_entity_manager.getEntities("Enemy"))
     {
-      reset();
-    }
+      float enemy_left {enemy->transform->position.x - enemy->circle_collider->bounds.getRadius()};
+      float enemy_right {enemy->transform->position.x + enemy->circle_collider->bounds.getRadius()};
+      float enemy_top {enemy->transform->position.y - enemy->circle_collider->bounds.getRadius()};
+      float enemy_bottom {enemy->transform->position.y + enemy->circle_collider->bounds.getRadius()};
 
-    for (auto bullet : m_entity_manager.getEntities("Bullet"))
-    {
-      if (utils::collider::checkCircleVsCircle(bullet, enemy))
+      if (enemy_left <= 0 || enemy_right >= m_render_texture.getSize().x)
       {
-        spawnSmallEnemies(enemy);
-        enemy->destroy();
-        bullet->destroy();
+        enemy->transform->direction.x = -enemy->transform->direction.x;
+      }
+      if (enemy_top <= 0 || enemy_bottom >= m_render_texture.getSize().y)
+      {
+        enemy->transform->direction.y = -enemy->transform->direction.y;
+      }
+
+      if (utils::collider::checkCircleVsCircle(m_player, enemy))
+      {
+        reset();
+      }
+
+      for (auto bullet : m_entity_manager.getEntities("Bullet"))
+      {
+        if (utils::collider::checkCircleVsCircle(bullet, enemy))
+        {
+          spawnSmallEnemies(enemy);
+          enemy->destroy();
+          bullet->destroy();
+        }
       }
     }
   }
@@ -597,14 +697,17 @@ void Game::handleCollision()
 
 void Game::handleLIfeSpan()
 {
-  for (auto entity : m_entity_manager.getEntities())
+  if (m_state == GameState::PLAY)
   {
-    if (entity->life_span)
+    for (auto entity : m_entity_manager.getEntities())
     {
-      entity->life_span->remaining -= m_delta_time;
-      if (entity->life_span->remaining <= 0.0f)
+      if (entity->life_span)
       {
-        entity->destroy();
+        entity->life_span->remaining -= m_delta_time;
+        if (entity->life_span->remaining <= 0.0f)
+        {
+          entity->destroy();
+        }
       }
     }
   }
