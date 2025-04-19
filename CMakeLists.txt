@@ -58,7 +58,7 @@ endforeach()
 add_custom_command(TARGET Eon POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${ASSETS_DIR}"
-  "${OUTPUT_DIR}/assets"
+  "${OUTPUT_DIR}/../assets"
 )
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Eon)

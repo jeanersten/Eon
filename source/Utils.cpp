@@ -85,7 +85,7 @@ std::filesystem::path utils::locator::getAssetPath(const std::filesystem::path& 
       return {};
     }
 
-    return std::filesystem::path(path).parent_path() / "assets" / file_path;
+    return std::filesystem::path(path).parent_path() / ".." / "assets" / file_path;
   #endif
 
   #if defined(__linux__)
@@ -96,7 +96,7 @@ std::filesystem::path utils::locator::getAssetPath(const std::filesystem::path& 
       return {};
     }
 
-    return std::filesystem::path(std::string(result, count)).parent_path() / "assets" / file_path;
+    return std::filesystem::path(std::string(result, count)).parent_path() / ".." / "assets" / file_path;
   #endif
 
   #if defined(__APPLE__)
@@ -108,7 +108,7 @@ std::filesystem::path utils::locator::getAssetPath(const std::filesystem::path& 
         return {};
     }
 
-    return std::filesystem::path(buffer.get()).parent_path() / "assets" / file_path;
+    return std::filesystem::path(buffer.get()).parent_path() / ".." / "assets" / file_path;
   #endif
 }
 
