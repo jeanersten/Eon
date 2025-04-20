@@ -1,7 +1,6 @@
 # Files
 .clangd
 
-
 # Folders
-.cache
-build
+.cache/
+build/
