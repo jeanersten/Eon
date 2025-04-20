@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DebugOverlay.h"
 #include "Entity.h"
 #include "EntityManager.h"
 
@@ -40,6 +41,8 @@ private:
   sf::Vector2f m_mouse_position;
 
   bool m_fullscreen;
+
+  DebugOverlay debug;
 
   sf::Texture m_player_textures[1];
   sf::Texture m_bullet_textures[1];

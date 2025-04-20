@@ -28,12 +28,14 @@ add_executable(Eon
   source/Game.cpp
   source/Entity.cpp
   source/EntityManager.cpp
+  source/DebugOverlay.cpp
   source/Components.cpp
 
   source/Utils.h
   source/Game.h
   source/Entity.h
   source/EntityManager.h
+  source/DebugOverlay.h
   source/Components.h
 )
 

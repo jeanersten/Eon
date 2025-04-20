@@ -58,6 +58,9 @@ void Game::init()
   m_view.setSize(static_cast<sf::Vector2f>(m_render_texture.getSize()));
   m_view.setCenter(m_view.getSize() / 2.0f);
   m_view = utils::renderer::getLetterboxView(m_render_window.getSize(), m_view);
+
+  debug.setDrawPosition(sf::Vector2f{5.0f, 5.0f});
+  debug.setTextGap(15.0f);
   
   if (!m_player_textures[0].loadFromFile(utils::locator::getAssetPath("textures/Player.png")))
   {
@@ -88,6 +91,10 @@ void Game::init()
 
 void Game::update()
 {
+  debug.write("x", std::to_string(m_player->transform->position.x));
+  debug.write("y", std::to_string(m_player->transform->position.y));
+  debug.write("t", std::to_string(m_current_time));
+
   handleEvent();
   handleRendering();
 
@@ -550,6 +557,7 @@ void Game::handleRendering()
       m_render_window.clear(sf::Color::White);
       m_render_window.setView(m_view);
       m_render_window.draw(render_sprite);
+      debug.draw(m_render_window);
       m_render_window.display();
     }
     break;
