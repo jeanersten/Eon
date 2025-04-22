@@ -52,6 +52,19 @@ sf::View utils::renderer::getLetterboxView(sf::Vector2u size, sf::View view)
   return view;
 }
 
+bool utils::collider::checkPointVsRectangle(sf::Vector2f point, std::shared_ptr<Entity> entity)
+{
+  float rectangle_left {entity->rectangle_collider->bounds.getPosition().x - entity->rectangle_collider->bounds.getSize().x / 2};
+  float rectangle_right {entity->rectangle_collider->bounds.getPosition().x + entity->rectangle_collider->bounds.getSize().x / 2};
+  float rectangle_top {entity->rectangle_collider->bounds.getPosition().y - entity->rectangle_collider->bounds.getSize().y / 2};
+  float rectangle_bottom {entity->rectangle_collider->bounds.getPosition().y + entity->rectangle_collider->bounds.getSize().y / 2};
+
+  return (point.x >= rectangle_left &&
+          point.x <= rectangle_right &&
+          point.y >= rectangle_top &&
+          point.y <= rectangle_bottom);
+}
+
 bool utils::collider::checkCircleVsCircle(std::shared_ptr<Entity> first_entity, std::shared_ptr<Entity> second_entity)
 {
   const float x_distance {second_entity->transform->position.x - first_entity->transform->position.x};

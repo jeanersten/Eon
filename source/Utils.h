@@ -17,6 +17,7 @@ namespace utils
 
   namespace collider
   {
+    bool checkPointVsRectangle(sf::Vector2f point, std::shared_ptr<Entity> entity);
     bool checkCircleVsCircle(std::shared_ptr<Entity> first_entity, std::shared_ptr<Entity> second_entity);
   }
 

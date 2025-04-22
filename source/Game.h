@@ -44,6 +44,8 @@ private:
 
   DebugOverlay debug;
 
+  sf::Texture m_banner_textures[1];
+  sf::Texture m_button_textures[2];
   sf::Texture m_player_textures[1];
   sf::Texture m_bullet_textures[1];
   sf::Texture m_enemy_textures[3];
@@ -57,6 +59,7 @@ private:
   void update();
   void reset();
 
+  void loadMainMenu();
   void spawnPlayer();
   void spawnBullet();
   void spawnEnemy();
@@ -64,6 +67,7 @@ private:
 
   void handleEvent();
   void handleRendering();
+  void handleMainMenu();
   void handleMovement();
   void handlePlayerShooting(float delay);
   void handleEnemySpawnTime(float interval, int max_enemies);
