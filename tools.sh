@@ -55,7 +55,6 @@ print_usage() {
   echo "              (defaults to debug if not specified)"
   echo "  run       : run executable binary for specified configuration"
   echo "              (defaults to debug if not specified)"
-  echo "  clean     : delete build directory"
   echo "-----------------------------------------------------------------------------------------"
   echo ""
 }
