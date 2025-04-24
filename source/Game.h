@@ -12,7 +12,7 @@
 enum class GameState
 {
   MAIN_MENU,
-  PAUSE_MENU,
+  PAUSE,
   PLAY,
   WIN,
   LOSE
@@ -44,7 +44,7 @@ private:
 
   DebugOverlay debug;
 
-  sf::Texture m_banner_textures[1];
+  sf::Texture m_banner_textures[2];
   sf::Texture m_button_textures[2];
   sf::Texture m_player_textures[1];
   sf::Texture m_bullet_textures[1];
@@ -60,6 +60,7 @@ private:
   void reset();
 
   void loadMainMenu();
+  void loadPauseMenu();
   void spawnPlayer();
   void spawnBullet();
   void spawnEnemy();
@@ -68,6 +69,7 @@ private:
   void handleEvent();
   void handleRendering();
   void handleMainMenu();
+  void handlePauseMenu();
   void handleMovement();
   void handlePlayerShooting(float delay);
   void handleEnemySpawnTime(float interval, int max_enemies);

@@ -62,9 +62,13 @@ void Game::init()
   debug.setDrawPosition(sf::Vector2f{5.0f, 5.0f});
   debug.setTextGap(15.0f);
   
-  if (!m_banner_textures[0].loadFromFile(utils::locator::getAssetPath("textures/Banner.png")))
+  if (!m_banner_textures[0].loadFromFile(utils::locator::getAssetPath("textures/MainBanner.png")))
   {
-    std::cerr << "Failed to load Banner.png\n";
+    std::cerr << "Failed to load MainBanner.png\n";
+  }
+  if (!m_banner_textures[1].loadFromFile(utils::locator::getAssetPath("textures/PauseBanner.png")))
+  {
+    std::cerr << "Failed to load PauseBanner.png\n";
   }
   if (!m_button_textures[0].loadFromFile(utils::locator::getAssetPath("textures/PlayButton.png")))
   {
@@ -115,6 +119,7 @@ void Game::update()
   if (m_render_window.hasFocus())
   {
     handleMainMenu();
+    handlePauseMenu();
     handleMovement();
     handlePlayerShooting(0.3f);
     handleEnemySpawnTime(0.6f, 5);
@@ -141,20 +146,7 @@ void Game::loadMainMenu()
   sf::Vector2f mid_world {static_cast<float>(m_render_texture.getSize().x) / 2.0f,
                           static_cast<float>(m_render_texture.getSize().y) / 2.0f};
 
-  auto banner {m_entity_manager.makeEntity("Banner")};
-
-  banner->transform = std::make_shared<CTransform>(sf::Vector2f{mid_world.x, mid_world.y - 96.0f});
-
-  banner->sprite = std::make_shared<CSprite>(m_banner_textures[0]);
-  banner->sprite->visual.setPosition(banner->transform->position);
-
-  banner->rectangle_collider = std::make_shared<CRectangleCollider>(sf::Vector2f{272.0f, 160.0f});
-  banner->rectangle_collider->bounds.setPosition(banner->transform->position);
-  banner->rectangle_collider->bounds.setFillColor(sf::Color::Transparent);
-  banner->rectangle_collider->bounds.setOutlineColor(sf::Color::Magenta);
-  banner->rectangle_collider->bounds.setOutlineThickness(1.0f);
-
-  auto play_button {m_entity_manager.makeEntity("Button")};
+  auto play_button {m_entity_manager.makeEntity("MainButton")};
 
   play_button->transform = std::make_shared<CTransform>(sf::Vector2f{mid_world.x, mid_world.y + 64.0f});
 
@@ -167,7 +159,7 @@ void Game::loadMainMenu()
   play_button->rectangle_collider->bounds.setOutlineColor(sf::Color::Magenta);
   play_button->rectangle_collider->bounds.setOutlineThickness(1.0f);
 
-  auto quit_button {m_entity_manager.makeEntity("Button")};
+  auto quit_button {m_entity_manager.makeEntity("MainButton")};
 
   quit_button->transform = std::make_shared<CTransform>(sf::Vector2f{mid_world.x, mid_world.y + 128.0f});
 
@@ -434,7 +426,7 @@ void Game::handleEvent()
         ;
       break;
 
-      case GameState::PAUSE_MENU:
+      case GameState::PAUSE:
         ;
       break;
 
@@ -470,10 +462,6 @@ void Game::handleEvent()
         {
           switch (key_pressed->scancode)
           {
-            case sf::Keyboard::Scancode::Space:
-              m_state = GameState::PAUSE_MENU;
-            break;
-
             case sf::Keyboard::Scancode::Left:
             case sf::Keyboard::Scancode::A:
               m_player->input->left = true;
@@ -557,9 +545,7 @@ void Game::handleRendering()
       for (auto entity : m_entity_manager.getEntities())
       {
         if (entity->transform && entity->sprite &&
-           (entity->getTag() == "Banner" ||
-            entity->getTag() == "Button"))
-
+            entity->getTag() == "MainButton")
         {
           entity->sprite->visual.setPosition(entity->transform->position);
 
@@ -593,6 +579,14 @@ void Game::handleRendering()
           }
         }
       }
+
+      sf::Sprite main_banner {m_banner_textures[0]};
+
+      main_banner.setPosition(sf::Vector2f{(static_cast<float>(m_render_texture.getSize().x / 2.0f)),
+                                           (static_cast<float>(m_render_texture.getSize().y / 2.0f) - 96.0f)});
+      main_banner.setOrigin(static_cast<sf::Vector2f>(main_banner.getTexture().getSize()) / 2.0f);
+
+      m_render_texture.draw(main_banner);
       m_render_texture.display();
 
       sf::Sprite render_sprite {m_render_texture.getTexture()};
@@ -604,10 +598,60 @@ void Game::handleRendering()
     }
     break;
 
-    case GameState::PAUSE_MENU:
+    case GameState::PAUSE:
     {
-      m_render_window.clear(sf::Color::Yellow);
+      m_render_texture.clear(sf::Color::Black);
+      for (auto entity : m_entity_manager.getEntities())
+      {
+        if (entity->transform && entity->sprite &&
+           (entity->getTag() == "Player" ||
+            entity->getTag() == "Bullet" ||
+            entity->getTag() == "Enemy" ||
+            entity->getTag() == "SmallEnemy"))
+        {
+          entity->sprite->visual.setPosition(entity->transform->position);
+          entity->sprite->visual.setRotation(entity->transform->rotation);
+          entity->sprite->visual.setScale(entity->transform->scale);
+
+          m_render_texture.draw(entity->sprite->visual);
+
+          if (entity->circle_collider)
+          {
+            entity->circle_collider->bounds.setPosition(entity->transform->position);
+
+            m_render_texture.draw(entity->circle_collider->bounds);
+          }
+
+          if (entity->life_span)
+          {
+            float ratio {entity->life_span->remaining / entity->life_span->total};
+            sf::Color color_transparent_change {entity->sprite->visual.getColor()};
+
+            color_transparent_change.a = 255 * ratio;
+
+            entity->sprite->visual.setColor(color_transparent_change);
+          }
+        }
+      }
+
+      sf::Color transparent_black {0, 0, 0, 100};
+      sf::RectangleShape screen_cover {sf::Vector2f{m_render_texture.getSize()}};
+      sf::Sprite pause_banner {m_banner_textures[1]};
+
+      screen_cover.setFillColor(transparent_black);
+      pause_banner.setPosition(static_cast<sf::Vector2f>(m_render_texture.getSize()) / 2.0f);
+      pause_banner.setOrigin(static_cast<sf::Vector2f>(pause_banner.getTexture().getSize()) / 2.0f);
+
+      m_render_texture.draw(screen_cover);
+      m_render_texture.draw(pause_banner);
+      m_render_texture.display();
+
+      sf::Sprite render_sprite {m_render_texture.getTexture()};
+
+      m_render_window.clear(sf::Color::White);
       m_render_window.setView(m_view);
+      m_render_window.draw(render_sprite);
+      debug.draw(m_render_window);
       m_render_window.display();
     }
     break;
@@ -689,7 +733,7 @@ void Game::handleMainMenu()
 {
   if (m_state == GameState::MAIN_MENU)
   {
-    for (auto entity : m_entity_manager.getEntities("Button"))
+    for (auto entity : m_entity_manager.getEntities("MainButton"))
     {
       if (utils::collider::checkPointVsRectangle(m_mouse_position, entity) &&
           sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
@@ -703,6 +747,42 @@ void Game::handleMainMenu()
           m_running = false;
         }
       }
+    }
+  }
+}
+
+void Game::handlePauseMenu()
+{
+  static bool space_pressed {false};
+
+  if (m_state == GameState::PLAY)
+  {
+    if (!space_pressed && sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::Space))
+    {
+      space_pressed = true;
+      m_state = GameState::PAUSE;
+    }
+    else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::Space))
+    {
+      space_pressed = false;
+    }
+  }
+  else if (m_state == GameState::PAUSE)
+  {
+    m_player->input->left = false;
+    m_player->input->right = false;
+    m_player->input->up = false;
+    m_player->input->down = false;
+    m_player->input->shoot = false;
+
+    if (!space_pressed && sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::Space))
+    {
+      space_pressed = true;
+      m_state = GameState::PLAY;
+    }
+    else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::Space))
+    {
+      space_pressed = false;
     }
   }
 }
