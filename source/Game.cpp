@@ -20,6 +20,8 @@ Game::Game(const std::string& title, sf::Vector2u resolution, bool fullscreen)
   , m_resolution(resolution)
   , m_min_resolution(sf::Vector2u{640, 480})
   , m_fullscreen(fullscreen)
+  , m_player_position_default(static_cast<sf::Vector2f>(m_render_texture.getSize()) / 2.0f)
+  , m_player_collided(false)
 {
   m_resolution.x < m_min_resolution.x ? m_resolution.x = m_min_resolution.x : m_resolution.x = resolution.x ;
   m_resolution.y < m_min_resolution.y ? m_resolution.y = m_min_resolution.y : m_resolution.y = resolution.y ;
@@ -70,6 +72,14 @@ void Game::init()
   {
     std::cerr << "Failed to load PauseBanner.png\n";
   }
+  if (!m_banner_textures[2].loadFromFile(utils::locator::getAssetPath("textures/WinBanner.png")))
+  {
+    std::cerr << "Failed to load WinBanner.png\n";
+  }
+  if (!m_banner_textures[3].loadFromFile(utils::locator::getAssetPath("textures/LoseBanner.png")))
+  {
+    std::cerr << "Failed to load LoseBanner.png\n";
+  }
   if (!m_button_textures[0].loadFromFile(utils::locator::getAssetPath("textures/PlayButton.png")))
   {
     std::cerr << "Failed to load PlayButton.png\n";
@@ -99,8 +109,6 @@ void Game::init()
     std::cerr << "Failed to load Enemy3.png\n";
   }
 
-  m_default_player_position = static_cast<sf::Vector2f>(m_render_texture.getSize()) / 2.0f;
-
   loadMainMenu();
   spawnPlayer();
   spawnEnemy();
@@ -112,6 +120,7 @@ void Game::update()
   debug.write("y", std::to_string(m_player->transform->position.y));
   debug.write("t", std::to_string(m_current_time));
   debug.write("f", std::to_string(1.0f / m_delta_time));
+  debug.write("p", std::to_string(m_points));
 
   handleEvent();
   handleRendering();
@@ -125,20 +134,30 @@ void Game::update()
     handleEnemySpawnTime(0.6f, 5);
     handleCollision();
     handleLIfeSpan();
+    handleEndGame();
   }
 }
 
 void Game::reset()
 {
+  m_player->input->left = false;
+  m_player->input->right = false;
+  m_player->input->up = false;
+  m_player->input->down = false;
+  m_player->input->shoot = false;
+
+  m_points = 0.0f;
+
   for (auto entity : m_entity_manager.getEntities())
   {
-    if (entity->getTag() != "Player")
+    if (entity->getTag() == "Enemy" ||
+        entity->getTag() == "SmallEnemy")
     {
       entity->destroy();
     }
   }
 
-  m_player->transform->position = m_default_player_position;
+  m_player->transform->position = m_player_position_default;
 }
 
 void Game::loadMainMenu()
@@ -177,7 +196,7 @@ void Game::spawnPlayer()
 {
   auto player {m_entity_manager.makeEntity("Player")};
 
-  player->transform = std::make_shared<CTransform>(m_default_player_position);
+  player->transform = std::make_shared<CTransform>(m_player_position_default);
   player->transform->speed = 200.0f;
 
   player->sprite = std::make_shared<CSprite>(m_player_textures[0]);
@@ -247,6 +266,8 @@ void Game::spawnEnemy()
       enemy->circle_collider->bounds.setFillColor(sf::Color::Transparent);
       enemy->circle_collider->bounds.setOutlineColor(sf::Color::Red);
       enemy->circle_collider->bounds.setOutlineThickness(1.0f);
+      
+      enemy->score = std::make_shared<CScore>(5.0f);
     }
     break;
 
@@ -264,6 +285,8 @@ void Game::spawnEnemy()
       enemy->circle_collider->bounds.setFillColor(sf::Color::Transparent);
       enemy->circle_collider->bounds.setOutlineColor(sf::Color::Red);
       enemy->circle_collider->bounds.setOutlineThickness(1.0f);
+
+      enemy->score = std::make_shared<CScore>(10.0f);
     }
     break;
 
@@ -281,6 +304,8 @@ void Game::spawnEnemy()
       enemy->circle_collider->bounds.setFillColor(sf::Color::Transparent);
       enemy->circle_collider->bounds.setOutlineColor(sf::Color::Red);
       enemy->circle_collider->bounds.setOutlineThickness(1.0f);
+
+      enemy->score = std::make_shared<CScore>(15.0f);
     }
     break;
 
@@ -337,6 +362,8 @@ void Game::spawnSmallEnemies(std::shared_ptr<Entity> enemy)
         small_enemy->circle_collider->bounds.setOutlineThickness(1.0f);
 
         small_enemy->life_span = std::make_shared<CLifeSpan>(0.8f);
+
+        small_enemy->score = std::make_shared<CScore>(1.0f);
       }
     }
     break;
@@ -365,6 +392,8 @@ void Game::spawnSmallEnemies(std::shared_ptr<Entity> enemy)
         small_enemy->circle_collider->bounds.setOutlineThickness(1.0f);
 
         small_enemy->life_span = std::make_shared<CLifeSpan>(0.8f);
+
+        small_enemy->score = std::make_shared<CScore>(2.0f);
       }
     }
     break;
@@ -393,6 +422,8 @@ void Game::spawnSmallEnemies(std::shared_ptr<Entity> enemy)
         small_enemy->circle_collider->bounds.setOutlineThickness(1.0f);
 
         small_enemy->life_span = std::make_shared<CLifeSpan>(0.8f);
+
+        small_enemy->score = std::make_shared<CScore>(3.0f);
       }
     }
     break;
@@ -521,11 +552,35 @@ void Game::handleEvent()
       break;
 
       case GameState::WIN:
-        ;
+        if (const auto* key_pressed = event->getIf<sf::Event::KeyPressed>())
+        {
+          switch (key_pressed->scancode)
+          {
+            case sf::Keyboard::Scancode::Enter:
+              m_state = GameState::MAIN_MENU;
+            break;
+
+            default:
+              ;
+            break;
+          }
+        }
       break;
 
       case GameState::LOSE:
-        ;
+        if (const auto* key_pressed = event->getIf<sf::Event::KeyPressed>())
+        {
+          switch (key_pressed->scancode)
+          {
+            case sf::Keyboard::Scancode::Enter:
+              m_state = GameState::MAIN_MENU;
+            break;
+
+            default:
+              ;
+            break;
+          }
+        }
       break;
 
       default:
@@ -705,16 +760,44 @@ void Game::handleRendering()
 
     case GameState::WIN:
     {
-      m_render_window.clear(sf::Color::Green);
+      m_render_texture.clear(sf::Color::Black);
+      sf::Sprite win_banner {m_banner_textures[2]};
+
+      win_banner.setPosition(sf::Vector2f{(static_cast<float>(m_render_texture.getSize().x / 2.0f)),
+                                           (static_cast<float>(m_render_texture.getSize().y / 2.0f) - 160.0f)});
+      win_banner.setOrigin(static_cast<sf::Vector2f>(win_banner.getTexture().getSize()) / 2.0f);
+
+      m_render_texture.draw(win_banner);
+      m_render_texture.display();
+
+      sf::Sprite render_sprite {m_render_texture.getTexture()};
+
+      m_render_window.clear(sf::Color::White);
       m_render_window.setView(m_view);
+      m_render_window.draw(render_sprite);
+      debug.draw(m_render_window);
       m_render_window.display();
     }
     break;
 
     case GameState::LOSE:
     {
-      m_render_window.clear(sf::Color::Red);
+      m_render_texture.clear(sf::Color::Black);
+      sf::Sprite lose_banner {m_banner_textures[3]};
+
+      lose_banner.setPosition(sf::Vector2f{(static_cast<float>(m_render_texture.getSize().x / 2.0f)),
+                                           (static_cast<float>(m_render_texture.getSize().y / 2.0f) - 160.0f)});
+      lose_banner.setOrigin(static_cast<sf::Vector2f>(lose_banner.getTexture().getSize()) / 2.0f);
+
+      m_render_texture.draw(lose_banner);
+      m_render_texture.display();
+
+      sf::Sprite render_sprite {m_render_texture.getTexture()};
+
+      m_render_window.clear(sf::Color::White);
       m_render_window.setView(m_view);
+      m_render_window.draw(render_sprite);
+      debug.draw(m_render_window);
       m_render_window.display();
     }
     break;
@@ -886,7 +969,7 @@ void Game::handleCollision()
 
       if (utils::collider::checkCircleVsCircle(m_player, enemy))
       {
-        reset();
+        m_player_collided = true;
       }
 
       for (auto bullet : m_entity_manager.getEntities("Bullet"))
@@ -896,6 +979,41 @@ void Game::handleCollision()
           spawnSmallEnemies(enemy);
           enemy->destroy();
           bullet->destroy();
+
+          m_points += enemy->score->amount;
+        }
+      }
+    }
+
+    for (auto small_enemy : m_entity_manager.getEntities("SmallEnemy"))
+    {
+      float small_enemy_left {small_enemy->transform->position.x - small_enemy->circle_collider->bounds.getRadius()};
+      float small_enemy_right {small_enemy->transform->position.x + small_enemy->circle_collider->bounds.getRadius()};
+      float small_enemy_top {small_enemy->transform->position.y - small_enemy->circle_collider->bounds.getRadius()};
+      float small_enemy_bottom {small_enemy->transform->position.y + small_enemy->circle_collider->bounds.getRadius()};
+
+      if (small_enemy_left <= 0 || small_enemy_right >= m_render_texture.getSize().x)
+      {
+        small_enemy->transform->direction.x = -small_enemy->transform->direction.x;
+      }
+      if (small_enemy_top <= 0 || small_enemy_bottom >= m_render_texture.getSize().y)
+      {
+        small_enemy->transform->direction.y = -small_enemy->transform->direction.y;
+      }
+
+      if (utils::collider::checkCircleVsCircle(m_player, small_enemy))
+      {
+        m_player_collided = true;
+      }
+
+      for (auto bullet : m_entity_manager.getEntities("Bullet"))
+      {
+        if (utils::collider::checkCircleVsCircle(bullet, small_enemy))
+        {
+          small_enemy->destroy();
+          bullet->destroy();
+
+          m_points += small_enemy->score->amount;
         }
       }
     }
@@ -916,6 +1034,24 @@ void Game::handleLIfeSpan()
           entity->destroy();
         }
       }
+    }
+  }
+}
+
+void Game::handleEndGame()
+{
+  if (m_state == GameState::PLAY)
+  {
+    if (m_points >= 100.0f)
+    {
+      reset();
+      m_state = GameState::WIN;
+    }
+    else if (m_player_collided)
+    {
+      reset();
+      m_player_collided = false;
+      m_state = GameState::LOSE;
     }
   }
 }

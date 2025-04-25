@@ -32,6 +32,8 @@ private:
 
   GameState m_state;
 
+  float m_points;
+
   sf::Vector2u m_resolution;
   sf::Vector2u m_min_resolution;
   sf::RenderWindow m_render_window;
@@ -44,7 +46,7 @@ private:
 
   DebugOverlay debug;
 
-  sf::Texture m_banner_textures[2];
+  sf::Texture m_banner_textures[4];
   sf::Texture m_button_textures[2];
   sf::Texture m_player_textures[1];
   sf::Texture m_bullet_textures[1];
@@ -53,7 +55,8 @@ private:
   EntityManager m_entity_manager;
 
   std::shared_ptr<Entity> m_player;
-  sf::Vector2f m_default_player_position;
+  sf::Vector2f m_player_position_default;
+  bool m_player_collided;
 
   void init();
   void update();
@@ -75,6 +78,7 @@ private:
   void handleEnemySpawnTime(float interval, int max_enemies);
   void handleCollision();
   void handleLIfeSpan();
+  void handleEndGame();
 
 public:
   Game(const std::string& title, sf::Vector2u resolution, bool full_screen);
