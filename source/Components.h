@@ -21,6 +21,13 @@ struct CSprite
   CSprite(const sf::Texture& texture);
 };
 
+struct CText
+{
+  sf::Text visual;
+
+  CText(const sf::Font& font);
+};
+
 struct CRectangleCollider
 {
   sf::RectangleShape bounds;

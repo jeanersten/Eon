@@ -32,20 +32,16 @@ private:
 
   GameState m_state;
 
-  float m_points;
-
   sf::Vector2u m_resolution;
   sf::Vector2u m_min_resolution;
   sf::RenderWindow m_render_window;
   sf::RenderTexture m_render_texture;
   sf::View m_view;
-
-  sf::Vector2f m_mouse_position;
-
   bool m_fullscreen;
 
   DebugOverlay debug;
 
+  sf::Font m_game_fonts[1];
   sf::Texture m_banner_textures[4];
   sf::Texture m_button_textures[2];
   sf::Texture m_player_textures[1];
@@ -54,31 +50,38 @@ private:
 
   EntityManager m_entity_manager;
 
+  sf::Vector2f m_mouse_position;
+
   std::shared_ptr<Entity> m_player;
   sf::Vector2f m_player_position_default;
   bool m_player_collided;
+
+  float m_points;
 
   void init();
   void update();
   void reset();
 
   void loadMainMenu();
-  void loadPauseMenu();
+  void loadPause();
+  void loadWin();
+  void loadLose();
   void spawnPlayer();
   void spawnBullet();
   void spawnEnemy();
   void spawnSmallEnemies(std::shared_ptr<Entity> enemy);
 
-  void handleEvent();
-  void handleRendering();
   void handleMainMenu();
-  void handlePauseMenu();
+  void handlePause();
+  void handleEndGame();
   void handleMovement();
   void handlePlayerShooting(float delay);
   void handleEnemySpawnTime(float interval, int max_enemies);
   void handleCollision();
-  void handleLIfeSpan();
-  void handleEndGame();
+  void handleLifeSpan();
+  void handleTransforms();
+  void handleEvent();
+  void handleRendering();
 
 public:
   Game(const std::string& title, sf::Vector2u resolution, bool full_screen);

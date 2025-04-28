@@ -20,6 +20,7 @@ private:
 public:
   std::shared_ptr<CTransform> transform;
   std::shared_ptr<CSprite> sprite;
+  std::shared_ptr<CText> text;
   std::shared_ptr<CRectangleCollider> rectangle_collider;
   std::shared_ptr<CCircleCollider> circle_collider;
   std::shared_ptr<CScore> score;

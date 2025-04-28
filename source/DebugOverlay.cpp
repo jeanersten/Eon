@@ -6,7 +6,7 @@
 #include <string>
 
 DebugOverlay::DebugOverlay()
-  : m_font(utils::locator::getAssetPath("fonts/dogica.ttf"))
+  : m_font(utils::locator::getAssetPath("fonts/Dogica.ttf"))
   , m_draw_position(sf::Vector2f{10.0f, 10.0f})
   , m_text_gap(10.f)
 {
