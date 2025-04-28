@@ -43,7 +43,6 @@ private:
 
   sf::Font m_game_fonts[1];
   sf::Texture m_banner_textures[4];
-  sf::Texture m_button_textures[2];
   sf::Texture m_player_textures[1];
   sf::Texture m_bullet_textures[1];
   sf::Texture m_enemy_textures[3];

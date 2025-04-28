@@ -93,18 +93,6 @@ void Game::init()
     exit(1);
   }
 
-  if (!m_button_textures[0].loadFromFile(utils::locator::getAssetPath("textures/PlayButton.png")))
-  {
-    std::cerr << "Failed to load PlayButton.png\n";
-    exit(1);
-  }
-
-  if (!m_button_textures[1].loadFromFile(utils::locator::getAssetPath("textures/QuitButton.png")))
-  {
-    std::cerr << "Failed to load QuitButton.png\n";
-    exit(1);
-  }
-
   if (!m_player_textures[0].loadFromFile(utils::locator::getAssetPath("textures/Player.png")))
   {
     std::cerr << "Failed to load Player.png\n";
