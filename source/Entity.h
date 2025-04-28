@@ -29,8 +29,8 @@ public:
 
   bool isActive();
 
-  unsigned int getID();
-  const std::string& getTag();
+  unsigned int getID() const;
+  const std::string& getTag() const;
 
   void destroy();
 };

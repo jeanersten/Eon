@@ -16,12 +16,12 @@ bool Entity::isActive()
   return m_active;
 }
 
-unsigned int Entity::getID()
+unsigned int Entity::getID() const
 {
   return m_id;
 }
 
-const std::string& Entity::getTag()
+const std::string& Entity::getTag() const
 {
   return m_tag;
 }

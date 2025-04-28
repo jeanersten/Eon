@@ -24,8 +24,8 @@ private:
 public:
   EntityManager();
 
-  const EntityCollection& getEntities();
-  const EntityCollection& getEntities(const std::string& tag);
+  const EntityCollection& getEntities() const;
+  const EntityCollection& getEntities(const std::string& tag) const;
 
   std::shared_ptr<Entity> makeEntity(const std::string& tag);
 
