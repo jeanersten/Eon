@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# Define few things to run logic.
+# * The specified executable name must match CMakeLists.txt's executable name.
 EXECUTABLE_NAME="Eon"
 BUILD_DIRECTORY="build"
 
@@ -30,7 +32,10 @@ COMPILER_GCC_PARAM="-gcc"
 
 DEBUG_PARAM="-deb"
 RELEASE_PARAM="-rel"
+# --
 
+# Print this script's usability.
+# * Show information about how to use the script.
 print_usage() {
   echo ""
   echo "usage: $0 [ generate -<generator> -<compiler> | build -(deb/rel) | run -(deb/rel) ]"
@@ -58,7 +63,12 @@ print_usage() {
   echo "-----------------------------------------------------------------------------------------"
   echo ""
 }
+# --
 
+# Guard for command 'generate'.
+# * Set generator to be used by CMake based on supported generator flag. 
+# * Specific compiler also can be supported if one is supported flag.
+# * If there's something wrong, print_usage function will be called.
 if [ "$1" = "$GENERATE_COMMAND" ]; then
   if [ "$2" = "$GENERATOR_MAKEFILE_MINGW_PARAM" ]; then
     BUILD_GENERATOR="MinGW Makefiles"
@@ -103,7 +113,12 @@ if [ "$1" = "$GENERATE_COMMAND" ]; then
     exit 1
   fi
 fi
+# --
 
+# Guard for comand 'build'.
+# * Set build configuration (Debug/Release).
+# * If a generator doesn't support multi-config will fallback to generator's default.
+# * If there's something wrong, print_usage function will be called.
 if [ "$1" = "$BUILD_COMMAND" ]; then
   if [ "$2" = "$DEBUG_PARAM" ]; then
     BUILD_CONFIG="Debug"
@@ -118,7 +133,12 @@ if [ "$1" = "$BUILD_COMMAND" ]; then
     exit 1
   fi
 fi
+# --
 
+# Guard for command 'run'.
+# * Set type of executable will be run (Debug/Release) from its binary directory.
+# * If a generator doesn't support multi-config will fallback to generator's default directory.
+# * If there's something wrong, print_usage function will be called.
 if [ "$1" = "$RUN_COMMAND" ]; then
   if [ "$2" = "$DEBUG_PARAM" ]; then
     RUN_CONFIG="Debug"
@@ -133,7 +153,10 @@ if [ "$1" = "$RUN_COMMAND" ]; then
     exit 1
   fi
 fi
+# --
 
+# Generate project files with CMake.
+# * Generating with this script meaning the build folder will always be named 'build'.
 generate() {
   if [ -n "$BUILD_GENERATOR" ]; then
     if [ -n "$C_COMPILER" ] && [ -n "$CPP_COMPILER" ]; then
@@ -149,11 +172,17 @@ generate() {
     exec cmake -B "$BUILD_DIRECTORY"
   fi
 }
+# --
 
+# Build to binaries with CMake.
+# * Using multi-core compilation process.
 build() {
   exec cmake --build "$BUILD_DIRECTORY" --config "$BUILD_CONFIG" --parallel $(nproc)
 }
+# --
 
+# Runs executable from binaries directory.
+# * Assuming that the build directory match default one which is 'build' so it can work.
 run() {
   if [ -x "$BUILD_DIRECTORY/$RUN_CONFIG/bin/$EXECUTABLE_NAME" ]; then
     exec "./$BUILD_DIRECTORY/$RUN_CONFIG/bin/$EXECUTABLE_NAME"
@@ -165,7 +194,10 @@ run() {
     exit 1
   fi
 }
+# --
 
+# Enable commands/flags based on arguments provided.
+# * Script invoke will call function according to provided arguments.
 case "$1" in
   $DEFAULT_COMMAND)
     print_usage
@@ -187,3 +219,4 @@ case "$1" in
     exit 1
     ;;
 esac
+# --

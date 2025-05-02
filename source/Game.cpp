@@ -1290,11 +1290,11 @@ void Game::handleTransforms()
       }
 
       if (entity->circle_collider)
-     {
+      {
         entity->circle_collider->bounds.setPosition(entity->transform->position);
         entity->circle_collider->bounds.setRotation(entity->transform->rotation);
         entity->circle_collider->bounds.setOrigin(sf::Vector2f{entity->circle_collider->bounds.getRadius() * entity->transform->scale.x,
-                                                               entity->circle_collider->bounds.getRadius() * entity->transform->scale.y});
+            entity->circle_collider->bounds.getRadius() * entity->transform->scale.y});
       }
     }
   }
