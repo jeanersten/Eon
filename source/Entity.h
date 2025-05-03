@@ -5,6 +5,15 @@
 #include <memory>
 #include <string>
 
+//  /+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\
+// | Entity is object that mainly is a container for components (data).            |
+// | * For each entity components are alocated as pointer to heap alocated data,   |
+// |   the value will be nullptr if one is not yet alocated.                       |
+// |                                                                               |
+// | ^ I know that this is very very very very very very bad idea, but I don't     |
+// |   have enough knowledge yet to implement this the better way.                 |
+//  \+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++/
+
 class Entity
 {
   friend class EntityManager;

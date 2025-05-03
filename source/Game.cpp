@@ -12,6 +12,9 @@
 #include <optional>
 #include <string>
 
+// +===============================================================================+
+// | Construct object window title, game resolution, fullscreen option.            |
+// +===============================================================================+
 Game::Game(const std::string& title, sf::Vector2u resolution, bool fullscreen)
   : m_title(title)
   , m_current_time(0.0f)
@@ -27,6 +30,9 @@ Game::Game(const std::string& title, sf::Vector2u resolution, bool fullscreen)
   init();
 }
 
+// +===============================================================================+
+// | Initialize necessary stuff.                                                   |
+// +===============================================================================+
 void Game::init()
 {
   m_state = GameState::MAIN_MENU;
@@ -137,6 +143,11 @@ void Game::init()
   spawnPlayer();
 }
 
+// +===============================================================================+
+// | Updates everything every frame                                                |
+// |                                                                               |
+// | ^ To be honest, I think it's bad, but I don't know what it is.                |
+// +===============================================================================+
 void Game::update()
 {
   debug.write("points", std::to_string(m_points));
@@ -154,14 +165,17 @@ void Game::update()
     handlePlayerShooting(0.3f);
     handleEnemySpawnTime(0.6f, 10);
     handleCollision();
+    handleTransform();
     handleLifeSpan();
-    handleTransforms();
   }
 
   handleEvent();
   handleRendering();
 }
 
+// +===============================================================================+
+// | Resets the game world to initial condition.                                   |
+// +===============================================================================+
 void Game::reset()
 {
   m_points = 0.0f;
@@ -186,6 +200,9 @@ void Game::reset()
 
 }
 
+// +===============================================================================+
+// | Load every main menus object.                                                 |
+// +===============================================================================+
 void Game::loadMainMenu()
 {
   sf::Vector2f mid_world {static_cast<float>(m_render_texture.getSize().x) / 2.0f,
@@ -214,6 +231,9 @@ void Game::loadMainMenu()
   play_indicator->rectangle_collider->bounds.setOutlineThickness(1.0f);
 }
 
+// +===============================================================================+
+// | Load every pause state object.                                                |
+// +===============================================================================+
 void Game::loadPause()
 {
   sf::Vector2f mid_world {static_cast<float>(m_render_texture.getSize().x) / 2.0f,
@@ -242,6 +262,9 @@ void Game::loadPause()
   pause_indicator->rectangle_collider->bounds.setOutlineThickness(1.0f);
 }
 
+// +===============================================================================+
+// | Load every win state object.                                                  |
+// +===============================================================================+
 void Game::loadWin()
 {
   sf::Vector2f mid_world {static_cast<float>(m_render_texture.getSize().x) / 2.0f,
@@ -270,6 +293,9 @@ void Game::loadWin()
   win_indicator->rectangle_collider->bounds.setOutlineThickness(1.0f);
 }
 
+// +===============================================================================+
+// | Load every lose state object.                                                 |
+// +===============================================================================+
 void Game::loadLose()
 {
   sf::Vector2f mid_world {static_cast<float>(m_render_texture.getSize().x) / 2.0f,
@@ -298,6 +324,9 @@ void Game::loadLose()
   lose_indicator->rectangle_collider->bounds.setOutlineThickness(1.0f);
 }
 
+// +===============================================================================+
+// | Spawn player.                                                                 |
+// +===============================================================================+
 void Game::spawnPlayer()
 {
   auto player {m_entity_manager.makeEntity("Player")};
@@ -317,6 +346,9 @@ void Game::spawnPlayer()
   m_player = player;
 }
 
+// +===============================================================================+
+// | Spawn bullet from player.                                                     |
+// +===============================================================================+
 void Game::spawnBullet()
 {
   auto bullet {m_entity_manager.makeEntity("Bullet")};
@@ -336,6 +368,9 @@ void Game::spawnBullet()
   bullet->life_span = std::make_shared<CLifeSpan>(1.0f);
 }
 
+// +===============================================================================+
+// | Spawn enemy in random position and type.                                      |
+// +===============================================================================+
 void Game::spawnEnemy()
 {
   int random_type {utils::generator::generateRandomIndex(1, 3)};
@@ -410,6 +445,9 @@ void Game::spawnEnemy()
   }
 }
 
+// +===============================================================================+
+// | Spawn small enemies after original enemy dead.                                |
+// +===============================================================================+
 void Game::spawnSmallEnemies(std::shared_ptr<Entity> enemy)
 {
   int type {0};
@@ -523,6 +561,9 @@ void Game::spawnSmallEnemies(std::shared_ptr<Entity> enemy)
   }
 }
 
+// +===============================================================================+
+// | Handle events in each state.                                                  |
+// +===============================================================================+
 void Game::handleEvent()
 {
   while(std::optional event = m_render_window.pollEvent())
@@ -697,6 +738,9 @@ void Game::handleEvent()
   }
 }
 
+// +===============================================================================+
+// | Handle rendering in each state.                                               |
+// +===============================================================================+
 void Game::handleRendering()
 {
   switch (m_state)
@@ -937,6 +981,9 @@ void Game::handleRendering()
   }
 }
 
+// +===============================================================================+
+// | Manages main menu state.                                                      |
+// +===============================================================================+
 void Game::handleMainMenu()
 {
   if (m_state == GameState::MAIN_MENU)
@@ -968,6 +1015,9 @@ void Game::handleMainMenu()
   }
 }
 
+// +===============================================================================+
+// | Manages pause state.                                                          |
+// +===============================================================================+
 void Game::handlePause()
 {
   static bool space_pressed {false};
@@ -1023,6 +1073,9 @@ void Game::handlePause()
   }
 }
 
+// +===============================================================================+
+// | Manages end game state (win/lose).                                            |
+// +===============================================================================+
 void Game::handleEndGame()
 {
   if (m_state == GameState::PLAY)
@@ -1085,6 +1138,9 @@ void Game::handleEndGame()
   }
 }
 
+// +===============================================================================+
+// | Implement every game object movement in game world.                           |
+// +===============================================================================+
 void Game::handleMovement()
 {
   if (m_state == GameState::PLAY)
@@ -1110,6 +1166,9 @@ void Game::handleMovement()
   }
 }
 
+// +===============================================================================+
+// | Handle shooting mechanism for player.                                         |
+// +===============================================================================+
 void Game::handlePlayerShooting(float delay)
 {
   if (m_state == GameState::PLAY)
@@ -1125,6 +1184,9 @@ void Game::handlePlayerShooting(float delay)
   }
 }
 
+// +===============================================================================+
+// | Handle enemy spawn timer.                                                     |
+// +===============================================================================+
 void Game::handleEnemySpawnTime(float interval, int max_enemies)
 {
   if (m_state == GameState::PLAY)
@@ -1142,6 +1204,9 @@ void Game::handleEnemySpawnTime(float interval, int max_enemies)
   }
 }
 
+// +===============================================================================+
+// | Handle collisions between entities in game world.                             |
+// +===============================================================================+
 void Game::handleCollision()
 {
   if (m_state == GameState::PLAY)
@@ -1238,26 +1303,10 @@ void Game::handleCollision()
   }
 }
 
-void Game::handleLifeSpan()
-{
-  if (m_state == GameState::PLAY)
-  {
-    for (auto entity : m_entity_manager.getEntities())
-    {
-      if (entity->life_span)
-      {
-        entity->life_span->remaining -= m_delta_time;
-
-        if (entity->life_span->remaining <= 0.0f)
-        {
-          entity->destroy();
-        }
-      }
-    }
-  }
-}
-
-void Game::handleTransforms()
+// +===============================================================================+
+// | Handle entity's transform components.                                         |
+// +===============================================================================+
+void Game::handleTransform()
 {
   for (auto entity : m_entity_manager.getEntities())
   {
@@ -1300,6 +1349,31 @@ void Game::handleTransforms()
   }
 }
 
+// +===============================================================================+
+// | Handle entity's life span components.                                         |
+// +===============================================================================+
+void Game::handleLifeSpan()
+{
+  if (m_state == GameState::PLAY)
+  {
+    for (auto entity : m_entity_manager.getEntities())
+    {
+      if (entity->life_span)
+      {
+        entity->life_span->remaining -= m_delta_time;
+
+        if (entity->life_span->remaining <= 0.0f)
+        {
+          entity->destroy();
+        }
+      }
+    }
+  }
+}
+
+// +===============================================================================+
+// | Actually run the game.                                                        |
+// +===============================================================================+
 void Game::run()
 {
   m_delta_clock.restart();
@@ -1316,3 +1390,16 @@ void Game::run()
 
   m_render_window.close();
 }
+
+// +~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~+
+// | The functions don't have good description because there's too many flaws in   |
+// | the implementation, as you can see, iteration throught vector is everywhere   |
+// | EVERY FRAME. WHICH IS BAD!! *cough. And there's more but i don't know how     |
+// | to explain it so yeah. One day I feel like wanna quit C++ cause this language |
+// | is very hard to learn, I even looked on how to render graphics from scratch   |
+// | in OpenGL with GLFW and GLAD and GOD DAMN! I can't even tell how did someone  |
+// | manage to do such complex computing graphics implementation, Its not just C++ |
+// | being language, that's when I realized that libraries are also language.      |
+// |                                                                               |
+// | I hope I'll learn more.                                                       |
+// +~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~+

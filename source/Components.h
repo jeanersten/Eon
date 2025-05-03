@@ -3,6 +3,12 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 
+//  /+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\
+// | Components are data to be attached to entity.                                 |
+// | * All components to be attached are in a single file (this file).             |
+// | * Every components represent general structure of data that can be allocated. |
+//  \+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++/
+
 struct CTransform
 {
   sf::Vector2f position;

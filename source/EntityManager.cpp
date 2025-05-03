@@ -2,10 +2,16 @@
 
 #include <string>
 
+// +===============================================================================+
+// | Default constructor.                                                          |
+// +===============================================================================+
 EntityManager::EntityManager()
   : m_total_entities(0)
 {}
 
+// +===============================================================================+
+// | Removes entities if it's marked inactive.                                     |
+// +===============================================================================+
 void EntityManager::removeInactiveEntities(EntityCollection& entities)
 {
   for (EntityCollection::iterator it = entities.begin(); it != entities.end();)
@@ -21,11 +27,17 @@ void EntityManager::removeInactiveEntities(EntityCollection& entities)
   }
 }
 
+// +===============================================================================+
+// | Get all entities in container.                                                |
+// +===============================================================================+
 const EntityCollection& EntityManager::getEntities() const
 {
   return m_entities;
 }
 
+// +===============================================================================+
+// | Get entities in container grouped by tag.                                     |
+// +===============================================================================+
 const EntityCollection& EntityManager::getEntities(const std::string& tag) const
 {
   static const EntityCollection empty {};
@@ -39,6 +51,9 @@ const EntityCollection& EntityManager::getEntities(const std::string& tag) const
   return empty;
 }
 
+// +===============================================================================+
+// | Creates new entity and store it to container.                                 |
+// +===============================================================================+
 std::shared_ptr<Entity> EntityManager::makeEntity(const std::string& tag)
 {
   auto entity = std::shared_ptr<Entity>(new Entity(++m_total_entities, tag));
@@ -49,6 +64,9 @@ std::shared_ptr<Entity> EntityManager::makeEntity(const std::string& tag)
   return entity;
 }
 
+// +===============================================================================+
+// | Update entity management every frame.                                         |
+// +===============================================================================+
 void EntityManager::update()
 {
   removeInactiveEntities(m_entities);

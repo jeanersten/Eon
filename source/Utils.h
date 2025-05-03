@@ -8,6 +8,15 @@
 #include <filesystem>
 #include <memory>
 
+//  /+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\
+// | Utils are function to help with game logic.                                   |
+// | * All utilities to be called are in a single file (this file).                |
+// | * Functions are grouped based in what terms is it used for.                   |
+// |                                                                               |
+// | ^ I don't know if it's a good idea to put utility functions like this but     |
+// |   this is the first time I did this.                                          |
+//  \+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++/
+
 namespace utils
 {
   namespace renderer

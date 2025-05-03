@@ -5,6 +5,9 @@
 
 #include <string>
 
+// +===============================================================================+
+// | Default constructor.                                                          |
+// +===============================================================================+
 DebugOverlay::DebugOverlay()
   : m_font(utils::locator::getAssetPath("fonts/Dogica.ttf"))
   , m_draw_position(sf::Vector2f{10.0f, 10.0f})
@@ -13,16 +16,26 @@ DebugOverlay::DebugOverlay()
   m_font.setSmooth(false);
 }
 
+// +===============================================================================+
+// | Set initial drawing position in game view.                                    |
+// +===============================================================================+
 void DebugOverlay::setDrawPosition(sf::Vector2f position)
 {
   m_draw_position = position;
 }
 
+// +===============================================================================+
+// | Set vertical text gap between drawn text messages.                            |
+// +===============================================================================+
 void DebugOverlay::setTextGap(float gap)
 {
   m_text_gap = gap;
 }
 
+// +===============================================================================+
+// | Write debug data based on key it represented as.                              |
+// | * Data are stored in a container.                                             |
+// +===============================================================================+
 void DebugOverlay::write(const std::string& key, const std::string& message)
 {
   const std::string full_text {key + ": " + message};
@@ -48,6 +61,11 @@ void DebugOverlay::write(const std::string& key, const std::string& message)
   }
 }
 
+// +===============================================================================+
+// | Draw every messages existed in container.                                     |
+// | * Messages are drawn from its initial position down vertically, gapped        |
+// |   between specified gap, ordered from the first write call key.               |
+// +===============================================================================+
 void DebugOverlay::draw(sf::RenderWindow& window)
 {
     int line {0};

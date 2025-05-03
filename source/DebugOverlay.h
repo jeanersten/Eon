@@ -6,6 +6,11 @@
 #include <unordered_map>
 #include <vector>
 
+//  /+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\
+// | Debug overlay is object that shows in game data to be shown.                  |
+// | * Class should be instantiated meaning there can be multiple debugger.        |
+//  \+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++/
+
 class DebugOverlay
 {
 private:

@@ -10,6 +10,15 @@
 using EntityCollection = std::vector<std::shared_ptr<Entity>>;
 using TaggedEntityCollection = std::map<std::string, EntityCollection>;
 
+//  /+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\
+// | Entity manager responsible of determining wether entity is on game or not.    |
+// | * Entities stored in vector and map, stored as copy of shared pointer to both |
+// |   container.                                                                  |
+// |                                                                               |
+// | ^ This is bad idea too and absolutely waste of performance, but I'm just too  |
+// |   dumb to understand more complex stuff.                                      |
+//  \+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++/
+
 class EntityManager
 {
 private:

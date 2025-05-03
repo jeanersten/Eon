@@ -18,6 +18,14 @@ enum class GameState
   LOSE
 };
 
+//  /+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\
+// | Game is implemented in single class to be run.                                |
+// | * Every systems and playing with entities data are implemented in functions.  |
+// |                                                                               |
+// | ^ This, this is where everything being utilized and where the whole game is   |
+// |   implemented.                                                                |
+//  \+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++/
+
 class Game
 {
 private:
@@ -77,8 +85,8 @@ private:
   void handlePlayerShooting(float delay);
   void handleEnemySpawnTime(float interval, int max_enemies);
   void handleCollision();
+  void handleTransform();
   void handleLifeSpan();
-  void handleTransforms();
   void handleEvent();
   void handleRendering();
 

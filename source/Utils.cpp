@@ -26,6 +26,11 @@
   #include <mach-o/dyld.h>
 #endif
 
+// +===============================================================================+
+// | Get the letterbox view from a render target.                                  |
+// | * The ratio will always be constant, only scaling and positioning render      |
+// |   target's view to always be centered.                                        |
+// +===============================================================================+
 sf::View utils::renderer::getLetterboxView(sf::Vector2u size, sf::View view)
 {
   float size_ratio {static_cast<float>(size.x) / static_cast<float>(size.y)};
@@ -52,6 +57,9 @@ sf::View utils::renderer::getLetterboxView(sf::Vector2u size, sf::View view)
   return view;
 }
 
+// +===============================================================================+
+// | Checks if a point is colliding with a rectangle.                              |
+// +===============================================================================+
 bool utils::collider::checkPointVsRectangle(sf::Vector2f point, std::shared_ptr<Entity> entity)
 {
   float rectangle_left {entity->rectangle_collider->bounds.getPosition().x - entity->rectangle_collider->bounds.getSize().x / 2};
@@ -65,6 +73,9 @@ bool utils::collider::checkPointVsRectangle(sf::Vector2f point, std::shared_ptr<
           point.y <= rectangle_bottom);
 }
 
+// +===============================================================================+
+// | Checks if a circle and circle is colliding.                                   |
+// +===============================================================================+
 bool utils::collider::checkCircleVsCircle(std::shared_ptr<Entity> first_entity, std::shared_ptr<Entity> second_entity)
 {
   const float x_distance {second_entity->transform->position.x - first_entity->transform->position.x};
@@ -78,16 +89,34 @@ bool utils::collider::checkCircleVsCircle(std::shared_ptr<Entity> first_entity, 
   return squared_distance <= squared_radius;
 }
 
+// +===============================================================================+
+// | Returns angle between two positios.                                           |
+// +===============================================================================+
 sf::Angle utils::calculator::angleBetween(sf::Vector2f from, sf::Vector2f to)
 {
   return (to - from).angle();
 }
 
+// +===============================================================================+
+// | Returns direction between two positions.                                      |
+// +===============================================================================+
 sf::Vector2f utils::calculator::directionBetween(sf::Vector2f from, sf::Vector2f to)
 {
   return (to - from).normalized();
 }
 
+// +===============================================================================+
+// | Returns a path to game assets.                                                |
+// | * This is platform specific because there's no way to detect the current      |
+// |   executable path automatically.                                              |
+// |                                                                               |
+// | ^ I don't really know about the code because it makes sense to me and not at  |
+// |   the same time.                                                              |
+// | ^ The code taking reference from some random guy on the internet and a bit    |
+// |   reading even though i don't really know what is going on under the hood.    |
+// | ^ For MacOS, I don't know if it works or not, i have tested it on Windows and |
+// |   Linux, both should work.                                                    |
+// +===============================================================================+
 std::filesystem::path utils::locator::getAssetPath(const std::filesystem::path& file_path)
 {
   #if defined(_WIN32)
@@ -125,6 +154,14 @@ std::filesystem::path utils::locator::getAssetPath(const std::filesystem::path& 
   #endif
 }
 
+// +===============================================================================+
+// | Generate random number (index) between specified range.                       |
+// |                                                                               |
+// | ^ Bad naming, I know.                                                         |
+// | ^ Honestly, I don't know what the heck is going on in every RNG function, I   |
+// |   found this when I implementing RNG in more C way using system clock and     |
+// |   random function, but I found this on the internet they say it's better.     |
+// +===============================================================================+
 int utils::generator::generateRandomIndex(int min_range, int max_range)
 {
   if (min_range > max_range)
@@ -138,6 +175,9 @@ int utils::generator::generateRandomIndex(int min_range, int max_range)
   return distribution(generator);
 }
 
+// +===============================================================================+
+// | Generate random direction between 360 degrees (circular).                     |
+// +===============================================================================+
 sf::Vector2f utils::generator::generateRandomDirection()
 {
   sf::Angle angle_range {sf::degrees(360)};
@@ -152,6 +192,12 @@ sf::Vector2f utils::generator::generateRandomDirection()
   return sf::Vector2f{x, y};
 }
 
+// +===============================================================================+
+// | Generate random position in game world.                                       |
+// |                                                                               |
+// | ^ This is specific to this game and not generalized, because the enemy can't  |
+// |   just spawn in player's position and broke the game.                         |
+// +===============================================================================+
 sf::Vector2f utils::generator::generateRandomPosition(float x_min_range, float x_max_range,
                                                       float y_min_range, float y_max_range,
                                                       sf::Vector2f player_position, float player_range)
