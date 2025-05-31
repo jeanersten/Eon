@@ -38,9 +38,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Add third-party libraries as subdirectories.
 # * Each folder must contain its own CMakeLists.txt file.
-add_subdirectory(
-  vendor/SFML
-)
+add_subdirectory(vendor/SFML)
 # --
 
 # Define the main executable and its sources.
@@ -60,13 +58,6 @@ add_executable(Eon
   source/EntityManager.h
   source/DebugOverlay.h
   source/Components.h
-)
-# --
-
-# Explicitly include third-party headers.
-# * Sometimes redundant, just to be explicit.
-target_include_directories(Eon PRIVATE
-  vendor/SFML/include
 )
 # --
 
